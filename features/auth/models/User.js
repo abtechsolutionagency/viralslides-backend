@@ -23,14 +23,19 @@ const userSchema = new mongoose.Schema({
   subscription: {
     plan: {
       type: String,
-      enum: ['free', 'creator', 'entrepreneur'],
-      default: 'free'
+      enum: ['creator', 'entrepreneur'],
+      default: undefined
     },
     status: {
       type: String,
-      enum: ['active', 'cancelled', 'past_due', 'trialing'],
-      default: 'active'
+      enum: ['inactive', 'active', 'cancelled', 'past_due', 'trialing'],
+      default: 'inactive'
     },
+    cancelAtPeriodEnd: {
+      type: Boolean,
+      default: false
+    },
+    planChangedAt: Date,
     stripeCustomerId: String,
     stripeSubscriptionId: String,
     currentPeriodStart: Date,
@@ -151,7 +156,6 @@ userSchema.methods.canAddTikTokAccount = function () {
 // Method to get account limit for current plan
 userSchema.methods.getTikTokAccountLimit = function () {
   const limits = {
-    free: 0,
     creator: 1,
     entrepreneur: Infinity // unlimited
   };

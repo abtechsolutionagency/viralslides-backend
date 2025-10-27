@@ -54,7 +54,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"name\": \"John Doe\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"John Doe\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/auth/register",
@@ -91,7 +91,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/auth/login",
@@ -160,7 +160,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"password\": \"NewPassword123\"\n}"
+              "raw": "{\n  \"token\": \"reset-token-from-email\",\n  \"password\": \"NewPassword123!\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/auth/reset-password",
@@ -301,7 +301,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword456\"\n}"
+              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword456!\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/auth/change-password",
@@ -333,6 +333,202 @@
               "path": ["api", "auth", "logout"]
             },
             "description": "Logout user and invalidate refresh token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/plans",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "plans"]
+            },
+            "description": "Retrieve all available subscription plans with pricing and credit allocations."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "me"]
+            },
+            "description": "Get the authenticated user's active subscription details and credit balances."
+          },
+          "response": []
+        },
+        {
+          "name": "Activate Plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"creator\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/activate",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "activate"]
+            },
+            "description": "Activate or change the authenticated user's subscription plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cancelAtPeriodEnd\": true\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/cancel",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "cancel"]
+            },
+            "description": "Schedule a subscription cancellation (default) or cancel immediately by setting cancelAtPeriodEnd to false."
+          },
+          "response": []
+        },
+        {
+          "name": "Resume Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/resume",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "resume"]
+            },
+            "description": "Resume a subscription that was set to cancel at period end."
+          },
+          "response": []
+        },
+        {
+          "name": "Purchase Credits",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credits\": 100\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/credits/purchase",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "credits", "purchase"]
+            },
+            "description": "Add additional credits to the authenticated user's balance."
+          },
+          "response": []
+        },
+        {
+          "name": "Credit History",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/subscriptions/credits/history?limit=25",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "subscriptions", "credits", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Retrieve recent credit transactions for the authenticated user."
           },
           "response": []
         }

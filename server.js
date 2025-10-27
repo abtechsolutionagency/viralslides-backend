@@ -56,8 +56,10 @@ app.use(cookieParser(COOKIE_SECRET));
 
 // ---- mount feature routers here (keep server.js slim)
 import authRoutes from './features/auth/routes/authRoutes.js';
+import subscriptionRoutes from './features/subscription/routes/subscriptionRoutes.js';
 
 app.use('/api/auth', authRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // ---- health & root
 app.get('/', (_req, res) => {
