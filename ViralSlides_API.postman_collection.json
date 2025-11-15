@@ -36,6 +36,48 @@
             "description": "Check API health and uptime"
           },
           "response": []
+        },
+        {
+          "name": "Publish TikTok Video (file upload)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "x-idempotency-key", "value": "demo-key-123", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "accountId", "value": "{{TIKTOK_ACCOUNT_ID}}", "type": "text" },
+                { "key": "mediaType", "value": "video", "type": "text" },
+                { "key": "caption", "value": "File upload caption", "type": "text" },
+                { "key": "privacy", "value": "public", "type": "text" },
+                { "key": "video", "type": "file", "src": "/path/to/video.mp4" }
+              ]
+            },
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/posts", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","posts"] },
+            "description": "Uploads and publishes a video via multipart/form-data with optional idempotency."
+          },
+          "response": []
+        },
+        {
+          "name": "TikTok Webhook (test)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tiktok-signature", "value": "{{TIKTOK_WEBHOOK_SECRET}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"permissions.revoked\",\n  \"account_id\": \"open_id_here\"\n}" },
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/webhook", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","webhook"] },
+            "description": "Simulate TikTok webhook (revocation)."
+          },
+          "response": []
         }
       ]
     },
@@ -533,6 +575,744 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "TikTok",
+      "item": [
+        {
+          "name": "Start TikTok OAuth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  if (jsonData?.data?.codeVerifier) {",
+                  "    pm.environment.set(\"TIKTOK_CODE_VERIFIER\", jsonData.data.codeVerifier);",
+                  "  }",
+                  "  if (jsonData?.data?.authorizationUrl) {",
+                  "    pm.environment.set(\"TIKTOK_AUTH_URL\", jsonData.data.authorizationUrl);",
+                  "  }",
+                  "}",
+                  "else {",
+                  "  pm.environment.unset(\"TIKTOK_CODE_VERIFIER\");",
+                  "  pm.environment.unset(\"TIKTOK_AUTH_URL\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUri\": \"{{TIKTOK_REDIRECT_URI}}\",\n  \"state\": \"optional-state\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/oauth/start",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "oauth",
+                "start"
+              ]
+            },
+            "description": "Generate TikTok OAuth authorization URL (PKCE) and retrieve the code verifier."
+          },
+          "response": []
+        },
+        {
+          "name": "Complete TikTok OAuth Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  var account = jsonData?.data?.account;",
+                  "  if (account?._id) {",
+                  "    pm.environment.set(\"TIKTOK_ACCOUNT_ID\", account._id);",
+                  "  }",
+                  "}",
+                  "else {",
+                  "  pm.environment.unset(\"TIKTOK_ACCOUNT_ID\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{TIKTOK_AUTH_CODE}}\",\n  \"codeVerifier\": \"{{TIKTOK_CODE_VERIFIER}}\",\n  \"redirectUri\": \"{{TIKTOK_REDIRECT_URI}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/oauth/callback",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "oauth",
+                "callback"
+              ]
+            },
+            "description": "Exchange the TikTok authorization code for access/refresh tokens and upsert the TikTok account."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh TikTok Access Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{TIKTOK_ACCOUNT_ID}}\",\n  \"force\": true\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/oauth/refresh",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "oauth",
+                "refresh"
+              ]
+            },
+            "description": "Refresh the TikTok access token when it is near expiry or has expired."
+          },
+          "response": []
+        },
+        {
+          "name": "Connect TikTok Account",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUri\": \"http://localhost:3000/tiktok/callback\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/connect",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "auth", "connect"]
+            },
+            "description": "Initialize TikTok OAuth flow to connect user's TikTok account"
+          },
+          "response": []
+        },
+        {
+          "name": "TikTok OAuth Callback",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"auth-code-from-tiktok\",\n  \"state\": \"state-from-oauth\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/callback",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "auth", "callback"]
+            },
+            "description": "Handle TikTok OAuth callback and save access tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Disconnect TikTok Account",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/disconnect",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "auth", "disconnect"]
+            },
+            "description": "Disconnect user's TikTok account and revoke access"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "profile"]
+            },
+            "description": "Get connected TikTok account profile information"
+          },
+          "response": []
+        },
+        {
+          "name": "Convert Slides to TikTok Video",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slideId\": \"slide-123\",\n  \"options\": {\n    \"duration\": 30,\n    \"transitionEffect\": \"fade\",\n    \"aspectRatio\": \"9:16\",\n    \"music\": {\n      \"trackId\": \"tiktok-music-id\",\n      \"volume\": 0.5\n    },\n    \"watermark\": true,\n    \"quality\": \"HD\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/convert",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "convert"]
+            },
+            "description": "Convert presentation slides to TikTok-optimized video format"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload to TikTok",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"caption\": \"Check out my presentation! #viral #slides\",\n  \"hashtags\": [\"#presentation\", \"#viral\", \"#education\"],\n  \"privacy\": \"public\",\n  \"allowComments\": true,\n  \"allowDuet\": true,\n  \"allowStitch\": true,\n  \"scheduleTime\": null\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/upload",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "upload"]
+            },
+            "description": "Upload converted video to TikTok with caption and settings"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Posts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/posts?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "posts"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get list of user's TikTok posts created through the app"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Post Analytics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/analytics/post/{{postId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "analytics", "post", "{{postId}}"]
+            },
+            "description": "Get analytics data for a specific TikTok post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Account Analytics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/analytics/account?startDate=2024-01-01&endDate=2024-01-31",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "analytics", "account"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            },
+            "description": "Get overall TikTok account analytics for a date range"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete TikTok Post",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/posts/{{postId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "posts", "{{postId}}"]
+            },
+            "description": "Delete a TikTok post created through the app"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Hashtags",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/trends/hashtags?category=education&limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "trends", "hashtags"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "education"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get trending TikTok hashtags for content optimization"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Audio",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/trends/audio?limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "trends", "audio"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get trending TikTok audio tracks for video creation"
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule TikTok Post",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"scheduleTime\": \"2024-12-25T10:00:00Z\",\n  \"caption\": \"Scheduled post #viral\",\n  \"hashtags\": [\"#scheduled\", \"#content\"],\n  \"privacy\": \"public\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/schedule",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "schedule"]
+            },
+            "description": "Schedule a TikTok post for future publishing"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Scheduled Posts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/scheduled",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "scheduled"]
+            },
+            "description": "Get list of all scheduled TikTok posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Scheduled Post",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/scheduled/{{scheduleId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "scheduled", "{{scheduleId}}"]
+            },
+          "description": "Cancel a scheduled TikTok post"
+          },
+          "response": []
+        },
+        {
+          "name": "GET TikTok OAuth Callback (Server Redirect)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/oauth/callback?code={{TIKTOK_AUTH_CODE}}&state={{TIKTOK_OAUTH_STATE}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "oauth", "callback"],
+              "query": [
+                { "key": "code", "value": "{{TIKTOK_AUTH_CODE}}" },
+                { "key": "state", "value": "{{TIKTOK_OAUTH_STATE}}" }
+              ]
+            },
+            "description": "Server-handled OAuth callback that uses a signed PKCE cookie set by /oauth/start."
+          },
+          "response": []
+        },
+        {
+          "name": "Publish TikTok Video (from URL)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": \"{{TIKTOK_ACCOUNT_ID}}\",\n  \"mediaType\": \"video\",\n  \"mediaUrl\": \"{{MEDIA_URL}}\",\n  \"caption\": \"My first post\",\n  \"privacy\": \"public\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/posts",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tiktok", "posts"]
+            },
+          "description": "Uploads and publishes a video to TikTok from a URL. Enforces daily limit and records usage."
+          },
+          "response": []
+        },
+        {
+          "name": "List TikTok Accounts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  const accounts = json?.data?.accounts || [];",
+                  "  if (accounts.length > 0 && accounts[0]._id) { pm.environment.set('TIKTOK_ACCOUNT_ID', accounts[0]._id); }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/accounts", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","accounts"] },
+            "description": "List connected TikTok accounts with daily usage and limits."
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/accounts/{{TIKTOK_ACCOUNT_ID}}", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","accounts","{{TIKTOK_ACCOUNT_ID}}"] },
+            "description": "Get a specific TikTok account details including daily post counters."
+          },
+          "response": []
+        },
+        {
+          "name": "Disconnect TikTok Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }] },
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/accounts/{{TIKTOK_ACCOUNT_ID}}", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","accounts","{{TIKTOK_ACCOUNT_ID}}"] },
+            "description": "Disconnect and remove a TikTok account."
+          },
+          "response": []
+        },
+        {
+          "name": "Record TikTok Usage",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }] },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"posts\": 1\n}" },
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/accounts/{{TIKTOK_ACCOUNT_ID}}/usage", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","accounts","{{TIKTOK_ACCOUNT_ID}}","usage"] },
+            "description": "Manually record usage against an account (primarily for testing)."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset TikTok Daily Quota",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{ACCESS_TOKEN}}", "type": "string" }] },
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/api/tiktok/accounts/{{TIKTOK_ACCOUNT_ID}}/reset-quota", "host": ["{{BASE_URL}}"], "path": ["api","tiktok","accounts","{{TIKTOK_ACCOUNT_ID}}","reset-quota"] },
+            "description": "Reset the daily post counters for an account (admin/test convenience)."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -543,6 +1323,46 @@
     },
     {
       "key": "ACCESS_TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_REDIRECT_URI",
+      "value": "https://9e620f0baaf9.ngrok-free.app/api/tiktok/oauth/callback",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_AUTH_URL",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_CODE_VERIFIER",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_AUTH_CODE",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_ACCOUNT_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "MEDIA_URL",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_OAUTH_STATE",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "TIKTOK_WEBHOOK_SECRET",
       "value": "",
       "type": "string"
     }
