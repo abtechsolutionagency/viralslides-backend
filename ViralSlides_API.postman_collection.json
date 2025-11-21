@@ -1313,6 +1313,182 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Image Generation",
+      "item": [
+        {
+          "name": "List Image Scenarios",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios"]
+            },
+            "description": "Get all image generation scenarios for the authenticated user. Requires verified email, active subscription, and creator/entrepreneur plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Image Scenario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios/{{scenarioId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios", "{{scenarioId}}"]
+            },
+            "description": "Get a specific image generation scenario by ID. Requires verified email, active subscription, and creator/entrepreneur plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Image Scenario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Image Generation Scenario\",\n  \"prompt\": \"Generate stunning images of futuristic cityscapes\",\n  \"aspectRatio\": \"9:16\",\n  \"imageCount\": 4,\n  \"aiModelId\": \"flux-1-kontext-pro\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios"]
+            },
+            "description": "Create a new image generation scenario. Requires verified email, active subscription, and creator/entrepreneur plan.\n\nRequired fields:\n- title: 3-120 characters\n- prompt: minimum 3 characters\n\nOptional fields:\n- aspectRatio: '16:9', '9:16', or '1:1' (default: '9:16')\n- imageCount: 1-20 (default: 4)\n- aiModelId: 'flux-1-kontext-pro', 'midjourney-v7', or 'midjourney-niji-6'\n- targets: array of target accounts with privacy settings\n- schedule: scheduling configuration\n  - type: 'manual', 'daily', or 'weekly' (default: 'manual')\n  - timezone: IANA timezone (default: 'UTC')\n  - dailyAt: time in HH:MM format for daily scheduling\n  - windows: array of weekly schedule windows\n- isAutoPostEnabled: boolean (default: true)\n- metadata: custom metadata object"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Image Scenario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Scenario Title\",\n  \"prompt\": \"Updated prompt for better image generation\",\n  \"imageCount\": 6,\n  \"status\": \"active\",\n  \"schedule\": {\n    \"type\": \"weekly\",\n    \"timezone\": \"Europe/London\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 0,\n        \"time\": \"10:00\"\n      },\n      {\n        \"dayOfWeek\": 2,\n        \"time\": \"14:30\"\n      },\n      {\n        \"dayOfWeek\": 4,\n        \"time\": \"16:00\"\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios/{{scenarioId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios", "{{scenarioId}}"]
+            },
+            "description": "Update an existing image generation scenario. Requires verified email, active subscription, and creator/entrepreneur plan.\n\nAll fields are optional but at least one must be provided:\n- title: 3-120 characters\n- prompt: minimum 3 characters\n- aspectRatio: '16:9', '9:16', or '1:1'\n- imageCount: 1-20\n- aiModelId: 'flux-1-kontext-pro', 'midjourney-v7', or 'midjourney-niji-6'\n- targets: array of target accounts\n- schedule: scheduling configuration\n- status: 'draft', 'active', or 'paused'\n- isAutoPostEnabled: boolean\n- thumbnailUrl: URI for custom thumbnail\n- metadata: custom metadata object"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Image Scenario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios/{{scenarioId}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios", "{{scenarioId}}"]
+            },
+            "description": "Delete an image generation scenario. Requires verified email, active subscription, and creator/entrepreneur plan."
+          },
+          "response": []
+        },
+        {
+          "name": "Run Image Scenario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trigger\": \"manual\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/image-scenarios/{{scenarioId}}/run",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "image-scenarios", "{{scenarioId}}", "run"]
+            },
+            "description": "Manually trigger an image generation scenario to run once. Requires verified email, active subscription, and creator/entrepreneur plan.\n\nOptional fields:\n- trigger: 'manual', 'schedule', or 'retry' (indicates what triggered this run)"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1363,6 +1539,11 @@
     },
     {
       "key": "TIKTOK_WEBHOOK_SECRET",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scenarioId",
       "value": "",
       "type": "string"
     }

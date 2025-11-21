@@ -58,10 +58,15 @@ app.use(cookieParser(COOKIE_SECRET));
 import authRoutes from './features/auth/routes/authRoutes.js';
 import subscriptionRoutes from './features/subscription/routes/subscriptionRoutes.js';
 import tiktokRoutes from './features/tiktok/routes/tiktokRoutes.js';
+import imageScenarioRoutes from './features/imageGeneration/routes/imageScenarioRoutes.js';
+import imageGenerationPublicRoutes from './features/imageGeneration/routes/imageGenerationPublicRoutes.js';
+import imageAssetCleanupService from './features/imageGeneration/services/imageAssetCleanupService.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/tiktok', tiktokRoutes);
+app.use('/api/image-generation', imageGenerationPublicRoutes);
+app.use('/api/image-scenarios', imageScenarioRoutes);
 
 // ---- health & root
 app.get('/', (_req, res) => {
@@ -95,5 +100,6 @@ async function start () {
 }
 
 start();
+imageAssetCleanupService.start();
 
 export default app;
