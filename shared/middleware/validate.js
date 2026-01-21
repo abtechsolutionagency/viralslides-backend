@@ -24,7 +24,7 @@ export const validate = (schema) => {
       });
     }
 
-    // Replace req.body with validated and sanitized value
+    // Replace req.body with validated and sanitized value.
     req.body = value;
 
     next();
