@@ -188,15 +188,26 @@ class AuthController {
 
       const result = await authService.forgotPassword({ email });
 
-      // TODO: Send password reset email using result.resetToken
-      // For now, we'll return it in the response (remove this in production)
+      if (result.resetToken && result.user) {
+        try {
+          await emailService.sendPasswordResetEmail({
+            to: result.user.email,
+            token: result.resetToken
+          });
+        } catch (emailError) {
+          req.log.error({ err: emailError, email }, 'Failed to send password reset email');
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to send password reset email'
+          });
+        }
+      }
 
       req.log.info({ email }, 'Password reset requested');
 
       res.status(200).json({
         success: true,
-        message: 'If the email exists, a reset link has been sent',
-        data: result.resetToken ? { resetToken: result.resetToken } : undefined // Remove in production
+        message: 'If the email exists, a reset link has been sent'
       });
     } catch (error) {
       req.log.error({ err: error }, 'Forgot password failed');
@@ -228,6 +239,43 @@ class AuthController {
       res.status(400).json({
         success: false,
         message: error.message
+      });
+    }
+  }
+
+  /**
+   * Redirect to frontend reset page with token (or error)
+   * GET /api/auth/reset-redirect?token=xxx
+   * User clicks link in email → backend redirects → frontend /reset-password?token=xxx
+   */
+  async resetRedirect (req, res) {
+    try {
+      const isDev = process.env.NODE_ENV !== 'production';
+      const frontendUrl = process.env.PASSWORD_RESET_URL ?? (isDev ? 'http://localhost:3000/reset-password' : null);
+      if (!frontendUrl) {
+        req.log.warn('PASSWORD_RESET_URL not configured');
+        return res.status(503).json({
+          success: false,
+          message: 'Password reset redirect is not configured'
+        });
+      }
+
+      const token = req.query.token ? String(req.query.token).trim() : '';
+      const { valid } = await authService.validateResetToken({ token });
+
+      const url = new URL(frontendUrl);
+      if (valid && token) {
+        url.searchParams.set('token', token);
+      } else {
+        url.searchParams.set('error', 'expired');
+      }
+
+      res.redirect(302, url.toString());
+    } catch (error) {
+      req.log.error({ err: error }, 'Reset redirect failed');
+      res.status(500).json({
+        success: false,
+        message: 'Redirect failed'
       });
     }
   }

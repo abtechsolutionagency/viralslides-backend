@@ -121,6 +121,19 @@ class AuthService {
   }
 
   /**
+   * Check if password reset token is valid (exists and not expired).
+   * Used by reset-redirect to decide where to send the user.
+   */
+  async validateResetToken ({ token }) {
+    if (!token || typeof token !== 'string') return { valid: false };
+    const user = await User.findOne({
+      passwordResetToken: token.trim(),
+      passwordResetExpires: { $gt: Date.now() }
+    }).select('_id').lean();
+    return { valid: !!user };
+  }
+
+  /**
    * Reset password with token
    */
   async resetPassword ({ token, password }) {

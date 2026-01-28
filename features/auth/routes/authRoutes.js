@@ -46,6 +46,12 @@ router.post(
   authController.forgotPassword
 );
 
+// Redirect to frontend reset page with token (link in email)
+router.get(
+  '/reset-redirect',
+  authController.resetRedirect
+);
+
 // Reset password with token
 router.post(
   '/reset-password',
