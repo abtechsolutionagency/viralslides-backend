@@ -103,7 +103,7 @@ class AuthService {
     const user = await User.findOne({ email });
     if (!user) {
       // Don't reveal if user exists for security
-      return { message: 'If the email exists, a reset link has been sent' };
+      return { message: 'Reset link has been sent to email' };
     }
 
     // Generate reset token

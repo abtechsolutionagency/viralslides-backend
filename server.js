@@ -49,6 +49,14 @@ app.use(
   })
 );
 
+// Stripe webhook needs raw body for signature verification (must be before express.json)
+import { handleStripeWebhook } from './features/subscription/controllers/stripeWebhookController.js';
+app.post(
+  '/api/subscriptions/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook
+);
+
 // parsers
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false }));

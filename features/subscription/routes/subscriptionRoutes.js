@@ -11,6 +11,7 @@ import {
 const router = express.Router();
 
 router.get('/plans', subscriptionController.listPlans.bind(subscriptionController));
+router.get('/credit-packs', subscriptionController.listCreditPacks.bind(subscriptionController));
 
 router.get(
   '/me',

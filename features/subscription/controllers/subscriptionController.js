@@ -1,4 +1,5 @@
 import subscriptionService from '../services/subscriptionService.js';
+import stripeService from '../services/stripeService.js';
 
 class SubscriptionController {
   async listPlans (_req, res) {
@@ -6,6 +7,18 @@ class SubscriptionController {
     res.status(200).json({
       success: true,
       data: { plans }
+    });
+  }
+
+  async listCreditPacks (_req, res) {
+    const packs = stripeService.CREDIT_PACKS.map(({ credits, price, stripePriceId }) => ({
+      credits,
+      price,
+      stripePriceId: stripePriceId || null
+    }));
+    res.status(200).json({
+      success: true,
+      data: { packs }
     });
   }
 
@@ -27,13 +40,27 @@ class SubscriptionController {
 
   async activatePlan (req, res) {
     try {
-      const { planId } = req.body;
+      const { planId, successPath, cancelPath } = req.body;
+      if (stripeService.stripe && process.env.STRIPE_SECRET_KEY) {
+        const { sessionId, url } = await stripeService.createSubscriptionCheckoutSession({
+          userId: req.user._id,
+          userEmail: req.user.email,
+          userName: req.user.name,
+          planId,
+          successPath: successPath || '/subscription/success',
+          cancelPath: cancelPath || '/subscription'
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'Redirect to Stripe Checkout',
+          data: { sessionId, checkoutUrl: url }
+        });
+      }
       const result = await subscriptionService.activatePlan({
         userId: req.user._id,
         planId
       });
-
-      req.log?.info({ userId: req.user._id, planId }, 'Subscription activated');
+      req.log?.info({ userId: req.user._id, planId }, 'Subscription activated (no Stripe)');
       res.status(200).json({
         success: true,
         message: 'Subscription activated successfully',
@@ -53,7 +80,8 @@ class SubscriptionController {
       const { cancelAtPeriodEnd = true } = req.body;
       const result = await subscriptionService.cancelSubscription({
         userId: req.user._id,
-        cancelAtPeriodEnd
+        cancelAtPeriodEnd,
+        stripeService: stripeService.stripe ? stripeService : null
       });
 
       req.log?.info({ userId: req.user._id, cancelAtPeriodEnd }, 'Subscription cancellation updated');
@@ -76,7 +104,8 @@ class SubscriptionController {
   async resumeSubscription (req, res) {
     try {
       const result = await subscriptionService.resumeSubscription({
-        userId: req.user._id
+        userId: req.user._id,
+        stripeService: stripeService.stripe ? stripeService : null
       });
 
       req.log?.info({ userId: req.user._id }, 'Subscription resumed');
@@ -96,13 +125,33 @@ class SubscriptionController {
 
   async purchaseCredits (req, res) {
     try {
-      const { credits } = req.body;
+      const { credits, stripePriceId, successPath, cancelPath } = req.body;
+      if (stripePriceId && stripeService.stripe && process.env.STRIPE_SECRET_KEY) {
+        const { sessionId, url } = await stripeService.createCreditsCheckoutSession({
+          userId: req.user._id,
+          userEmail: req.user.email,
+          userName: req.user.name,
+          stripePriceId,
+          successPath: successPath || '/credits/success',
+          cancelPath: cancelPath || '/credits'
+        });
+        return res.status(200).json({
+          success: true,
+          message: 'Redirect to Stripe Checkout',
+          data: { sessionId, checkoutUrl: url }
+        });
+      }
+      if (credits == null || credits < 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Provide credits (for manual grant) or stripePriceId (for Stripe checkout)'
+        });
+      }
       const result = await subscriptionService.purchaseCredits({
         userId: req.user._id,
         credits,
         metadata: { source: 'manual_purchase' }
       });
-
       req.log?.info({ userId: req.user._id, credits }, 'Credits purchased');
       res.status(200).json({
         success: true,

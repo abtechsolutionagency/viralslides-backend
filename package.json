@@ -8,7 +8,8 @@
     "dev": "nodemon --env-file=.env --watch server.js",
     "start": "node server.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "stripe:create-products": "node --env-file=.env scripts/createStripeProducts.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
   "type": "module",
   "dependencies": {
     "argon2": "^0.44.0",
+    "stripe": "^17.4.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^5.1.0",
