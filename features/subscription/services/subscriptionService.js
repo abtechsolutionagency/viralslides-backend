@@ -138,6 +138,90 @@ class SubscriptionService {
     };
   }
 
+  /**
+   * Update subscription plan (upgrade/downgrade).
+   * With Stripe: creates checkout session for prorated payment, then updates subscription via webhook after payment.
+   * Without Stripe: updates plan in DB and grants new plan's monthly credits.
+   */
+  async updateSubscription ({ userId, planId, stripeService }) {
+    const plan = getPlanById(planId);
+    if (!plan) throw new Error('Invalid subscription plan selected');
+
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    if (!['active', 'trialing'].includes(user.subscription?.status)) {
+      throw new Error('You need an active subscription to change plan. Please activate a plan first.');
+    }
+
+    const previousPlanId = user.subscription.plan;
+    if (previousPlanId === planId) {
+      return await this.getUserSubscription(userId);
+    }
+
+    if (user.subscription?.stripeSubscriptionId && stripeService?.stripe && stripeService?.updateStripeSubscription) {
+      if (!plan.stripePriceId) throw new Error('Plan is not linked to Stripe.');
+      
+      // Update subscription directly in Stripe - Stripe will automatically charge the customer's card
+      // for the prorated amount. Webhook will confirm the update after payment succeeds.
+      const updatedStripeSubscription = await stripeService.updateStripeSubscription(
+        user.subscription.stripeSubscriptionId,
+        plan.stripePriceId,
+        { userId: userId.toString(), planId }
+      );
+      
+      // Sync subscription state from Stripe (plan, period, status)
+      // Note: The invoice payment will be handled via webhook (invoice.paid with billing_reason: 'subscription_update')
+      await this.syncSubscriptionFromStripe({ stripeSubscription: updatedStripeSubscription });
+      const userAfterSync = await User.findById(userId);
+      const syncedPlan = getPlanById(userAfterSync.subscription.plan);
+      
+      return {
+        plan: serializePlan(syncedPlan),
+        status: userAfterSync.subscription.status,
+        cancelAtPeriodEnd: Boolean(userAfterSync.subscription.cancelAtPeriodEnd),
+        currentPeriodStart: userAfterSync.subscription.currentPeriodStart,
+        currentPeriodEnd: userAfterSync.subscription.currentPeriodEnd,
+        credits: {
+          balance: userAfterSync.credits.balance,
+          lifetime: userAfterSync.credits.lifetime
+        },
+        message: 'Subscription update initiated. Payment will be processed automatically and subscription will be updated via webhook.'
+      };
+    }
+
+    const now = new Date();
+    const nextBillingDate = this.calculateNextBillingDate(now);
+    user.subscription.plan = plan.id;
+    user.subscription.planChangedAt = now;
+    user.subscription.currentPeriodStart = now;
+    user.subscription.currentPeriodEnd = nextBillingDate;
+
+    const creditAwarded = plan.monthlyCredits || 0;
+    if (creditAwarded > 0) {
+      await this.adjustCredits({
+        user,
+        amount: creditAwarded,
+        type: 'plan_change',
+        description: `Plan changed to ${plan.name}`,
+        metadata: { planId: plan.id, previousPlanId }
+      });
+    }
+    await user.save();
+
+    return {
+      plan: serializePlan(plan),
+      status: user.subscription.status,
+      cancelAtPeriodEnd: Boolean(user.subscription.cancelAtPeriodEnd),
+      currentPeriodStart: user.subscription.currentPeriodStart,
+      currentPeriodEnd: user.subscription.currentPeriodEnd,
+      credits: {
+        balance: user.credits.balance,
+        lifetime: user.credits.lifetime
+      }
+    };
+  }
+
   async purchaseCredits ({ userId, credits, metadata }) {
     if (credits <= 0) {
       throw new Error('Credits must be greater than zero');

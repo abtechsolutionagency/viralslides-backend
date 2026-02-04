@@ -1,6 +1,6 @@
 import stripeService from '../services/stripeService.js';
 import subscriptionService from '../services/subscriptionService.js';
-import { getPlanByStripePriceId } from '../constants/plans.js';
+import { getPlanByStripePriceId, getPlanById } from '../constants/plans.js';
 
 /**
  * Handle Stripe webhook events. Must be invoked with raw body (Buffer).
@@ -79,6 +79,15 @@ async function handleStripeWebhook (req, res) {
             }
           }
           
+          // Handle subscription update (plan change) - sync subscription to ensure plan is updated
+          if (invoice.billing_reason === 'subscription_update') {
+            if (stripeService.stripe) {
+              const stripeSubscription = await stripeService.stripe.subscriptions.retrieve(subscriptionId);
+              await subscriptionService.syncSubscriptionFromStripe({ stripeSubscription });
+              req.log?.info({ subscriptionId, planId: plan?.id, amount: invoice.amount_paid }, 'Subscription update payment processed, subscription synced');
+            }
+          }
+          
           // Handle renewal payments (subscription_cycle) - grant renewal credits
           if (invoice.billing_reason === 'subscription_cycle' && plan) {
             const amount = plan.monthlyCredits ?? 0;
@@ -91,6 +100,42 @@ async function handleStripeWebhook (req, res) {
               req.log?.info({ subscriptionId, planId: plan.id, amount }, 'Renewal credits granted');
             }
           }
+        }
+        break;
+      }
+      case 'invoice.created': {
+        const invoice = event.data.object;
+        if (invoice.subscription && invoice.billing_reason === 'subscription_update') {
+          req.log?.info({
+            subscriptionId: invoice.subscription,
+            invoiceId: invoice.id,
+            amount: invoice.amount_due,
+            billingReason: invoice.billing_reason
+          }, 'Invoice created for subscription update (proration)');
+        }
+        break;
+      }
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object;
+        if (invoice.subscription && invoice.billing_reason === 'subscription_update') {
+          // Handle subscription update payment success - ensure subscription is synced
+          if (stripeService.stripe) {
+            const stripeSubscription = await stripeService.stripe.subscriptions.retrieve(invoice.subscription);
+            await subscriptionService.syncSubscriptionFromStripe({ stripeSubscription });
+            req.log?.info({ subscriptionId: invoice.subscription, amount: invoice.amount_paid }, 'Subscription update payment succeeded');
+          }
+        }
+        break;
+      }
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object;
+        if (invoice.subscription && invoice.billing_reason === 'subscription_update') {
+          req.log?.warn({
+            subscriptionId: invoice.subscription,
+            invoiceId: invoice.id,
+            amount: invoice.amount_due,
+            attemptCount: invoice.attempt_count
+          }, 'Subscription update payment failed');
         }
         break;
       }

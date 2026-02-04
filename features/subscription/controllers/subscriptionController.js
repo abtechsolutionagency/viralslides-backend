@@ -75,6 +75,30 @@ class SubscriptionController {
     }
   }
 
+  async updateSubscription (req, res) {
+    try {
+      const { planId } = req.body;
+      const result = await subscriptionService.updateSubscription({
+        userId: req.user._id,
+        planId,
+        stripeService: stripeService.stripe ? stripeService : null
+      });
+
+      req.log?.info({ userId: req.user._id, planId }, 'Subscription plan update initiated');
+      res.status(200).json({
+        success: true,
+        message: result.message || 'Subscription plan update initiated. Payment will be processed automatically.',
+        data: result
+      });
+    } catch (error) {
+      req.log?.error({ err: error, userId: req.user?._id }, 'Subscription update failed');
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
   async cancelSubscription (req, res) {
     try {
       const { cancelAtPeriodEnd = true } = req.body;

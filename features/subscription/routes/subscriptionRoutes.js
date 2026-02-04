@@ -5,7 +5,8 @@ import { validate } from '../../../shared/middleware/validate.js';
 import {
   activatePlanValidator,
   cancelSubscriptionValidator,
-  purchaseCreditsValidator
+  purchaseCreditsValidator,
+  updatePlanValidator
 } from '../validators/subscriptionValidator.js';
 
 const router = express.Router();
@@ -26,6 +27,14 @@ router.post(
   requireVerifiedEmail,
   validate(activatePlanValidator),
   subscriptionController.activatePlan.bind(subscriptionController)
+);
+
+router.patch(
+  '/update',
+  authenticate,
+  requireVerifiedEmail,
+  validate(updatePlanValidator),
+  subscriptionController.updateSubscription.bind(subscriptionController)
 );
 
 router.post(
