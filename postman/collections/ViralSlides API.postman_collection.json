@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "c37d8960-7e08-4f7b-a6f8-c11ce4ae757b",
+    "_postman_id": "97c91bfc-0d1c-4a55-93c4-0d5ac7051fa0",
     "name": "ViralSlides API",
     "description": "API collection for ViralSlides.ai backend",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -11,7 +11,7 @@
       "item": [
         {
           "name": "API Root",
-          "id": "ea40baea-61e9-4e07-a49e-b51239a832e1",
+          "id": "ec2fbbff-686c-45de-94cf-d7d8c5293fdb",
           "request": {
             "method": "GET",
             "header": [],
@@ -30,7 +30,7 @@
         },
         {
           "name": "Health Check",
-          "id": "20e56b0b-80ba-446a-b948-a0ef91ccff43",
+          "id": "1f8f69ca-4f91-48cd-82c5-f6efced31200",
           "request": {
             "method": "GET",
             "header": [],
@@ -49,7 +49,7 @@
         },
         {
           "name": "Publish TikTok Video (file upload)",
-          "id": "47d3ff97-8efb-4ebe-8ee3-3f73c62af825",
+          "id": "528ddd81-aded-4824-b6ca-741f7d66442d",
           "request": {
             "auth": {
               "type": "bearer",
@@ -118,7 +118,7 @@
         },
         {
           "name": "TikTok Webhook (test)",
-          "id": "7fba7f77-bb6c-490f-93b1-334200da7d4d",
+          "id": "391694ce-4531-4e97-ac92-98fd84679d0a",
           "request": {
             "method": "POST",
             "header": [
@@ -151,14 +151,14 @@
           "response": []
         }
       ],
-      "id": "8aa8f371-97f0-4279-a1ee-155f18c6eefe"
+      "id": "129ccaba-e92c-483e-90d5-5bee4119fbbf"
     },
     {
       "name": "Auth",
       "item": [
         {
           "name": "Register",
-          "id": "cbeefa0a-da6a-4a94-b1ab-dceeb043bce5",
+          "id": "0d264a2e-2053-4342-8760-ff7b2111fe7a",
           "request": {
             "method": "POST",
             "header": [
@@ -191,7 +191,7 @@
           },
           "response": [
             {
-              "id": "7352c0c2-56b7-4c1e-b943-a0143ba9730b",
+              "id": "d37c281f-ddc7-4139-8609-7370a86d128a",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -230,7 +230,7 @@
               "body": "{\n  \"success\": true,\n  \"message\": \"Registration successful. Please verify your email.\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"isEmailVerified\": false,\n      \"subscription\": {\n        \"status\": \"inactive\"\n      },\n      \"credits\": {\n        \"balance\": 0,\n        \"lifetime\": 0\n      },\n      \"createdAt\": \"2024-01-01T00:00:00.000Z\",\n      \"updatedAt\": \"2024-01-01T00:00:00.000Z\"\n    },\n    \"verificationToken\": \"email-verification-token-here\"\n  }\n}"
             },
             {
-              "id": "7e83e8ab-b446-4c79-8a0a-9e122ca03bae",
+              "id": "3e88f1c6-9556-441f-9825-b487f46da43d",
               "name": "Validation Error",
               "originalRequest": {
                 "method": "POST",
@@ -276,6 +276,7 @@
             {
               "listen": "test",
               "script": {
+                "id": "e69745be-06b3-4355-98ba-ac80dde8d3df",
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
@@ -288,9 +289,21 @@
                 "packages": {},
                 "requests": {}
               }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "db6e27ed-a531-4998-a720-5e2b1e4faee7",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
           ],
-          "id": "f47c55ee-a253-43bf-834e-f7c520190ad3",
+          "id": "044a9463-8c57-43b6-9ac7-9a63f6d390c8",
           "request": {
             "method": "POST",
             "header": [
@@ -301,7 +314,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"aqibhassanzeb@gmail.com\",\n  \"password\": \"12345678\"\n}",
+              "raw": "{\n  \"email\": \"codewithashim@gmail.com\",\n  \"password\": \"Password123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -323,7 +336,7 @@
           },
           "response": [
             {
-              "id": "45f6ba7f-9b55-4a64-9f5c-38664eeeed68",
+              "id": "7ded0d28-7a29-46f8-9cbe-b955f0bf28c5",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -366,7 +379,7 @@
               "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"isEmailVerified\": true,\n      \"subscription\": {\n        \"plan\": \"creator\",\n        \"status\": \"active\"\n      },\n      \"credits\": {\n        \"balance\": 100,\n        \"lifetime\": 500\n      }\n    },\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  }\n}"
             },
             {
-              "id": "1d038218-8a66-4a86-8ca4-2191f85d555e",
+              "id": "b47f803a-7979-442a-bbf8-e8ac07ec7fb5",
               "name": "Invalid Credentials",
               "originalRequest": {
                 "method": "POST",
@@ -408,7 +421,7 @@
         },
         {
           "name": "Verify Email",
-          "id": "abd80b76-a017-4239-9899-fa98e5167def",
+          "id": "10771948-243d-4cfd-8088-67bec4fc6309",
           "request": {
             "method": "POST",
             "header": [
@@ -441,7 +454,7 @@
           },
           "response": [
             {
-              "id": "839fb247-ae5a-48ba-9fbc-403919ef3d3d",
+              "id": "845244b7-d6f5-4904-9213-e631221c487b",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -483,7 +496,7 @@
         },
         {
           "name": "Forgot Password",
-          "id": "5055e08f-c1d2-4bfe-9478-d7323f60fbc4",
+          "id": "145f3012-0583-42a8-abbd-cb0ecd5d4b5a",
           "request": {
             "method": "POST",
             "header": [
@@ -516,7 +529,7 @@
           },
           "response": [
             {
-              "id": "ce9e0560-c531-4a74-89f0-620561a475fe",
+              "id": "24b2cf79-62e2-4541-b068-fdef245958ea",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -557,35 +570,8 @@
           ]
         },
         {
-          "name": "Reset Password Redirect",
-          "id": "36279a75-d830-449b-aa27-e8bfe77f014b",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/reset-redirect?token={{RESET_TOKEN}}",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "auth",
-                "reset-redirect"
-              ],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "{{RESET_TOKEN}}"
-                }
-              ]
-            },
-            "description": "Redirects to the frontend reset-password page with the token from the email link."
-          },
-          "response": []
-        },
-        {
           "name": "Reset Password",
-          "id": "ecb80632-b6ae-42c2-869e-202aeecd802d",
+          "id": "7b232574-d69d-402e-b654-b19c37fcc05c",
           "request": {
             "method": "POST",
             "header": [
@@ -618,7 +604,7 @@
           },
           "response": [
             {
-              "id": "17f62b6a-40e4-491a-b2a7-0ac7cd04e26e",
+              "id": "82436173-02d8-4694-aeb9-0caeb607d12f",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -660,7 +646,7 @@
         },
         {
           "name": "Resend Verification Email",
-          "id": "cbeb222c-a948-4b77-84ca-def3d42d4e62",
+          "id": "79b29deb-1e04-4c63-b323-26e815e6902a",
           "request": {
             "method": "POST",
             "header": [
@@ -693,7 +679,7 @@
           },
           "response": [
             {
-              "id": "227fe680-0677-4ee6-8217-b1d6af03bd3e",
+              "id": "7af17fd0-804c-44f4-9447-0cbebfe1c87e",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -747,11 +733,12 @@
                   "    }",
                   "}"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "id": "20aa274c-4a04-4591-b227-8d11fa0954db"
               }
             }
           ],
-          "id": "56c3c405-a45d-4f77-bba5-a648898c0c70",
+          "id": "fc61e3e5-7deb-42b2-9e8e-c80e67956b27",
           "request": {
             "method": "POST",
             "header": [],
@@ -770,7 +757,7 @@
           },
           "response": [
             {
-              "id": "f772a8b6-4512-400f-b4fc-bc146aba541c",
+              "id": "9546973f-c6d1-4a75-8dd0-997c1a2fae30",
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
@@ -803,7 +790,7 @@
         },
         {
           "name": "Get Current User",
-          "id": "1b36e84f-7e88-43fc-a930-1d859092da09",
+          "id": "fbabd258-ba99-4f70-b028-90e936b48799",
           "request": {
             "auth": {
               "type": "bearer",
@@ -832,7 +819,7 @@
           },
           "response": [
             {
-              "id": "8698d504-ecc2-4095-a391-19e05e3f1ccc",
+              "id": "660a9775-b4b7-4a93-a96c-7030d84fe296",
               "name": "Success",
               "originalRequest": {
                 "auth": {
@@ -875,7 +862,7 @@
         },
         {
           "name": "Update Profile",
-          "id": "e8381aa9-1d7d-4144-8287-18d3809dbb30",
+          "id": "6b2ddd6f-b89a-4e4d-a258-bf566f1e4b5f",
           "request": {
             "auth": {
               "type": "bearer",
@@ -918,7 +905,7 @@
           },
           "response": [
             {
-              "id": "6cb57fd5-4dbf-4568-a0a9-5e0f6c58d7c3",
+              "id": "e4c21661-2013-4e55-a122-c8d41a6361c2",
               "name": "Success - Name Update",
               "originalRequest": {
                 "auth": {
@@ -967,7 +954,7 @@
               "body": "{\n  \"success\": true,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"user@example.com\",\n      \"name\": \"Jane Doe\",\n      \"isEmailVerified\": true\n    }\n  }\n}"
             },
             {
-              "id": "c1c5bb8e-525a-48d6-ad26-653123b8aaba",
+              "id": "42485de0-0eee-4155-87b3-0765d2fcfb46",
               "name": "Success - Email Update",
               "originalRequest": {
                 "auth": {
@@ -1019,7 +1006,7 @@
         },
         {
           "name": "Change Password",
-          "id": "f67afedf-b927-4b87-9239-6546cc332807",
+          "id": "7b83a9d9-8aff-4d62-bb58-28081ce92130",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1062,7 +1049,7 @@
           },
           "response": [
             {
-              "id": "e1dfd59f-6a23-4e86-8832-8a1caaba6171",
+              "id": "0f51ff8a-28be-4684-a0c2-a2f2e578ccf7",
               "name": "Success",
               "originalRequest": {
                 "auth": {
@@ -1114,7 +1101,7 @@
         },
         {
           "name": "Logout",
-          "id": "7e8d6f0d-4bd2-4f3c-bc11-19eef6cf204d",
+          "id": "cdf33d62-8022-4147-9654-56dccf6b6aa0",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1143,7 +1130,7 @@
           },
           "response": [
             {
-              "id": "c2734837-6090-4b85-a36c-4fdbdd896d9b",
+              "id": "290f9641-2a63-40b3-b3f4-510c1d74793b",
               "name": "Success",
               "originalRequest": {
                 "auth": {
@@ -1204,11 +1191,12 @@
                 ],
                 "type": "text/javascript",
                 "packages": {},
-                "requests": {}
+                "requests": {},
+                "id": "8dd18843-6526-4468-944c-5c4090c54721"
               }
             }
           ],
-          "id": "9c76bb45-7b76-4134-9c84-5ce34bbc7f60",
+          "id": "950dd15f-9a8b-4f8d-b04f-5746a7ff5830",
           "request": {
             "auth": {
               "type": "noauth"
@@ -1254,11 +1242,12 @@
                 ],
                 "type": "text/javascript",
                 "packages": {},
-                "requests": {}
+                "requests": {},
+                "id": "e3918f24-b602-4a96-9806-d127ab89775b"
               }
             }
           ],
-          "id": "a7aaa669-a4b3-438c-9c3c-3823f81d24e8",
+          "id": "32406b59-3e8c-470e-8fec-8ba7aac614a6",
           "request": {
             "auth": {
               "type": "noauth"
@@ -1289,7 +1278,7 @@
           "response": []
         }
       ],
-      "id": "f7da9d49-57aa-4332-bd11-34e919706df4",
+      "id": "2e0c8e3c-694b-44f0-a358-bef440b9c8df",
       "description": "Authentication and user management endpoints. All endpoints use Bearer token authentication except public routes (register, login, verify-email, forgot-password, reset-password, resend-verification, refresh-token)."
     },
     {
@@ -1297,7 +1286,7 @@
       "item": [
         {
           "name": "List Plans",
-          "id": "7c78a40a-ff77-4472-8f7f-3fa63d3e6ec5",
+          "id": "d93dd218-ec32-47ff-bf74-dbeeb2470153",
           "request": {
             "method": "GET",
             "header": [],
@@ -1318,7 +1307,7 @@
         },
         {
           "name": "Get My Subscription",
-          "id": "0bf73bae-649e-4d02-83ef-2178722a3ed4",
+          "id": "722f131e-e16d-4a8a-bb53-a1bd67158934",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1349,7 +1338,7 @@
         },
         {
           "name": "Activate Plan",
-          "id": "b460ee88-63dc-4455-a30b-ab3a76a9abbd",
+          "id": "129e7916-a284-4b42-a3db-f6e49b8aaad4",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1389,7 +1378,7 @@
         },
         {
           "name": "Cancel Subscription",
-          "id": "dc1f6c38-e56e-40dc-8b6b-0c010cd29f43",
+          "id": "4717a84c-7850-4ead-af89-76427b0e255b",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1429,7 +1418,7 @@
         },
         {
           "name": "Resume Subscription",
-          "id": "c4759236-b34e-4205-ac76-d01a7e8c1d15",
+          "id": "4c31d1ef-826b-489e-84c0-9f2f500f2433",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1460,7 +1449,7 @@
         },
         {
           "name": "Purchase Credits",
-          "id": "c771d0c2-5702-4958-9cac-dae332bc803d",
+          "id": "310e8f20-9e61-4a1f-8266-700eae422517",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1501,7 +1490,7 @@
         },
         {
           "name": "Credit History",
-          "id": "987e2737-1114-44a3-942d-c5e95e3c5f73",
+          "id": "fe458dc7-ac73-4b3a-8dfa-bea9f78e22a5",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1539,7 +1528,7 @@
         },
         {
           "name": "Credit list",
-          "id": "743a4229-1844-4e35-b3cb-6758cead9396",
+          "id": "f7c541e3-2c96-452d-a1b3-888f25abd3d2",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1569,7 +1558,7 @@
         },
         {
           "name": "Update subscription",
-          "id": "3b551883-4209-4226-8efb-86ac43ad99ed",
+          "id": "fddd5f24-e6a9-4a61-b77a-64cedf22e9d2",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1607,7 +1596,7 @@
           "response": []
         }
       ],
-      "id": "8f5f0e5d-84f3-4703-99d2-a502b028f62f"
+      "id": "66f7797a-f7f4-4178-8924-7cc8eb24fe20"
     },
     {
       "name": "TikTok",
@@ -1633,11 +1622,12 @@
                   "  pm.environment.unset(\"TIKTOK_AUTH_URL\");",
                   "}"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "id": "1c874e9f-e5a4-4081-a4de-70b900e64421"
               }
             }
           ],
-          "id": "11bbb227-1a39-4958-9682-6df5ee9d42e8",
+          "id": "3a6223a6-6654-4837-b9ed-1da6d86f3955",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1694,11 +1684,12 @@
                   "  pm.environment.unset(\"TIKTOK_ACCOUNT_ID\");",
                   "}"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "id": "e6ffaace-84bc-4561-a341-021febc61e2e"
               }
             }
           ],
-          "id": "dfdef4e7-53a4-4b35-aa30-d3fc910336c0",
+          "id": "2bf4b398-7fb2-4ce7-bf97-cf99ac0a0dac",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1739,7 +1730,7 @@
         },
         {
           "name": "Refresh TikTok Access Token",
-          "id": "e3754f8c-3bde-4932-ab48-ce4e95cb4fc4",
+          "id": "95074722-d050-48b3-9ac8-daf939ceeb67",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1779,8 +1770,564 @@
           "response": []
         },
         {
+          "name": "Connect TikTok Account",
+          "id": "ca0fbed6-e4b9-4b2e-bc17-7f37510bcb75",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUri\": \"http://localhost:3000/tiktok/callback\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/connect",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "auth",
+                "connect"
+              ]
+            },
+            "description": "Initialize TikTok OAuth flow to connect user's TikTok account"
+          },
+          "response": []
+        },
+        {
+          "name": "TikTok OAuth Callback",
+          "id": "d1e74ddd-c57a-40b4-82a5-9cf372585556",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"auth-code-from-tiktok\",\n  \"state\": \"state-from-oauth\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/callback",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "auth",
+                "callback"
+              ]
+            },
+            "description": "Handle TikTok OAuth callback and save access tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Disconnect TikTok Account",
+          "id": "a91202f5-8531-492b-9545-26d9d6c4ec15",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/auth/disconnect",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "auth",
+                "disconnect"
+              ]
+            },
+            "description": "Disconnect user's TikTok account and revoke access"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Profile",
+          "id": "7bf1ac7e-aa73-47b1-b541-96fa959968fb",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/profile",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "profile"
+              ]
+            },
+            "description": "Get connected TikTok account profile information"
+          },
+          "response": []
+        },
+        {
+          "name": "Convert Slides to TikTok Video",
+          "id": "222b03a8-1147-4afa-a8da-bbd763566153",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slideId\": \"slide-123\",\n  \"options\": {\n    \"duration\": 30,\n    \"transitionEffect\": \"fade\",\n    \"aspectRatio\": \"9:16\",\n    \"music\": {\n      \"trackId\": \"tiktok-music-id\",\n      \"volume\": 0.5\n    },\n    \"watermark\": true,\n    \"quality\": \"HD\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/convert",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "convert"
+              ]
+            },
+            "description": "Convert presentation slides to TikTok-optimized video format"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload to TikTok",
+          "id": "1ddaf0a0-97a3-4552-a292-9d4a7da8b6e7",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"caption\": \"Check out my presentation! #viral #slides\",\n  \"hashtags\": [\"#presentation\", \"#viral\", \"#education\"],\n  \"privacy\": \"public\",\n  \"allowComments\": true,\n  \"allowDuet\": true,\n  \"allowStitch\": true,\n  \"scheduleTime\": null\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/upload",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "upload"
+              ]
+            },
+            "description": "Upload converted video to TikTok with caption and settings"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Posts",
+          "id": "f176cec6-06e4-4a9d-9279-e5bb4c8dcb88",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/posts?limit=20&offset=0",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get list of user's TikTok posts created through the app"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Post Analytics",
+          "id": "13dce735-a8c8-437e-8232-c06154dd5efa",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/analytics/post/{{postId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "analytics",
+                "post",
+                "{{postId}}"
+              ]
+            },
+            "description": "Get analytics data for a specific TikTok post"
+          },
+          "response": []
+        },
+        {
+          "name": "Get TikTok Account Analytics",
+          "id": "de1f49ea-f4cf-40f4-abed-f7853bce1238",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/analytics/account?startDate=2024-01-01&endDate=2024-01-31",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "analytics",
+                "account"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            },
+            "description": "Get overall TikTok account analytics for a date range"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete TikTok Post",
+          "id": "7606749c-d740-4694-98cd-bed0d9635ad3",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/posts/{{postId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "posts",
+                "{{postId}}"
+              ]
+            },
+            "description": "Delete a TikTok post created through the app"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Hashtags",
+          "id": "3ff12ced-bb9e-410b-86fd-141a9c90c0bf",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/trends/hashtags?category=education&limit=20",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "trends",
+                "hashtags"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "education"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get trending TikTok hashtags for content optimization"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Audio",
+          "id": "7aa93a01-19bf-417b-b991-0c8a81282a9a",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/trends/audio?limit=20",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "trends",
+                "audio"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get trending TikTok audio tracks for video creation"
+          },
+          "response": []
+        },
+        {
+          "name": "Schedule TikTok Post",
+          "id": "7191ff82-6145-4c74-8c7a-705e823ff259",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"scheduleTime\": \"2024-12-25T10:00:00Z\",\n  \"caption\": \"Scheduled post #viral\",\n  \"hashtags\": [\"#scheduled\", \"#content\"],\n  \"privacy\": \"public\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/schedule",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "schedule"
+              ]
+            },
+            "description": "Schedule a TikTok post for future publishing"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Scheduled Posts",
+          "id": "d6be227a-87fa-4d92-bf7d-377da2aaf997",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/scheduled",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "scheduled"
+              ]
+            },
+            "description": "Get list of all scheduled TikTok posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Scheduled Post",
+          "id": "e7934b9a-882c-4729-92e3-bce5fb73c8ca",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tiktok/scheduled/{{scheduleId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "tiktok",
+                "scheduled",
+                "{{scheduleId}}"
+              ]
+            },
+            "description": "Cancel a scheduled TikTok post"
+          },
+          "response": []
+        },
+        {
           "name": "GET TikTok OAuth Callback (Server Redirect)",
-          "id": "7f97db8d-8d32-4f68-a033-f33f6f35c4b4",
+          "id": "cdb20fea-2c6e-42f8-bccc-90b318970135",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1822,7 +2369,7 @@
         },
         {
           "name": "Publish TikTok Video (from URL)",
-          "id": "4b9c6cd4-6316-4048-b845-79d99864f2c9",
+          "id": "1df6ea82-93f0-4644-86c0-9f55063c11f7",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1873,11 +2420,12 @@
                   "  if (accounts.length > 0 && accounts[0]._id) { pm.environment.set('TIKTOK_ACCOUNT_ID', accounts[0]._id); }",
                   "}"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "id": "f3d11b1d-385b-4042-8814-e269cb90aef2"
               }
             }
           ],
-          "id": "608efe7a-814d-4bc3-971f-45c3298ba1b7",
+          "id": "a5ae2661-765b-49cf-a081-8c0cd9e48c20",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1908,7 +2456,7 @@
         },
         {
           "name": "Get TikTok Account",
-          "id": "c60e7eae-a51f-4835-b82d-db3824cd8dbd",
+          "id": "cb01befd-2fbc-4979-b7f8-d7a383ac7324",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1940,7 +2488,7 @@
         },
         {
           "name": "Disconnect TikTok Account",
-          "id": "be4d5afe-781b-4c47-8add-c0e63cf99bde",
+          "id": "a16ac7f9-0dbb-418b-a699-7fc2890dca8f",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1972,7 +2520,7 @@
         },
         {
           "name": "Record TikTok Usage",
-          "id": "2af24378-42fd-47a9-9fd5-e384ccd032dd",
+          "id": "a5e6c477-c5da-4519-b112-d5c2a76223cb",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2014,7 +2562,7 @@
         },
         {
           "name": "Reset TikTok Daily Quota",
-          "id": "14fbf647-066d-494a-92c0-ff3a01f5c79d",
+          "id": "308fcbbf-a63b-4b30-afda-9cd5e84c3c69",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2046,14 +2594,14 @@
           "response": []
         }
       ],
-      "id": "9cb66fbd-17fc-4579-a7da-23c844ecc2ea"
+      "id": "30a56592-49a8-4a3a-a979-a34fe92c45b2"
     },
     {
       "name": "Image Generation",
       "item": [
         {
           "name": "List Image Scenarios",
-          "id": "953d00ae-2e2f-49d1-9e24-e538281146f1",
+          "id": "38e6807d-7bde-467b-b852-95e4d15d0a28",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2083,7 +2631,7 @@
         },
         {
           "name": "Get Image Scenario",
-          "id": "d341da6c-7979-48a2-b682-08962233d03e",
+          "id": "b7026ecd-0ef5-4a76-828e-82af2024046e",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2114,7 +2662,7 @@
         },
         {
           "name": "Create Image Scenario",
-          "id": "57df21a5-bf5a-4a44-9d46-ce699a4d96ef",
+          "id": "183ac87b-7733-4c95-b236-ce9c76c242cc",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2153,7 +2701,7 @@
         },
         {
           "name": "Update Image Scenario",
-          "id": "abdf8fae-dead-41ef-8e99-28f016cfa235",
+          "id": "ecd7d576-a558-4888-b041-27df44d84818",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2193,7 +2741,7 @@
         },
         {
           "name": "Delete Image Scenario",
-          "id": "fce5b344-b49f-4ccf-a2db-232c60ff3177",
+          "id": "5fc132c0-dc5a-4767-aeda-12141750ec3e",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2224,7 +2772,7 @@
         },
         {
           "name": "Run Image Scenario",
-          "id": "3c630a1a-3c65-4924-ae1e-8ae37c17f0bf",
+          "id": "cf78a9b0-3921-4eb7-ba08-4d53aa76be33",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2262,51 +2810,16 @@
             "description": "Manually trigger an image generation scenario to run once. Requires verified email, active subscription, and creator/entrepreneur plan.\n\nOptional fields:\n- trigger: 'manual', 'schedule', or 'retry' (indicates what triggered this run)"
           },
           "response": []
-        },
-        {
-          "name": "Image Generation Callback",
-          "id": "2b86cbb6-053e-4edc-8c0c-2b0e4a093afb",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"runId\": \"{{scenarioRunId}}\",\n  \"status\": \"completed\",\n  \"assets\": [\n    {\n      \"url\": \"https://example.com/image.jpg\",\n      \"promptIndex\": 0\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/image-generation/callback",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "image-generation",
-                "callback"
-              ]
-            },
-            "description": "Public callback endpoint for Make.com to submit image generation results."
-          },
-          "response": []
         }
       ],
-      "id": "3bbc8465-d264-4b01-8081-0d8eadde7bde"
+      "id": "d657d12d-7b1a-448f-a401-3d279be02d57"
     },
     {
       "name": "Video Generation",
       "item": [
         {
           "name": "List Video Scenarios",
-          "id": "cd2472ba-396d-4f81-80b6-188e10806962",
+          "id": "ace8e8cb-fe9e-4efc-96f4-5949139cd404",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2336,7 +2849,7 @@
         },
         {
           "name": "Get Video Scenario",
-          "id": "1117e38a-a4e5-4b27-8ba7-a144ee6feab6",
+          "id": "8b46f6d1-8533-49cd-8bb3-a8bf723681f7",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2367,7 +2880,7 @@
         },
         {
           "name": "Create Video Scenario",
-          "id": "c1d33f4e-4e39-4a11-9956-45d7c36cdf1d",
+          "id": "faa24d5c-e0df-469e-b76c-eddb90a52080",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2388,7 +2901,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate stunning videos of futuristic cityscapes\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 4,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
+              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate stunning videos of futuristic cityscapes\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 1,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/video-scenarios",
@@ -2406,7 +2919,7 @@
         },
         {
           "name": "Update Video Scenario",
-          "id": "70c4cecf-fb8a-4ba4-96a2-68009d999d90",
+          "id": "9b79f7fa-b792-4180-ba3d-f72ec2dc2f42",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2446,7 +2959,7 @@
         },
         {
           "name": "Delete Video Scenario",
-          "id": "2a3c3f72-ef95-4275-afde-a08c99abb0b2",
+          "id": "cbf0d5d5-8dd7-4b68-85f0-e222ff87bf59",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2477,7 +2990,7 @@
         },
         {
           "name": "Run Video Scenario",
-          "id": "d4e3adb8-92c2-46ef-8ccb-7166b350fe63",
+          "id": "cfa2c7e9-4d7d-40f7-9751-980c12701c9c",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2518,7 +3031,7 @@
         },
         {
           "name": "Video Generation Callback",
-          "id": "1bd00b36-ced5-47bf-afd3-5984cacfdb82",
+          "id": "8474764a-ae6a-4342-8aaa-0e9e5eac3a21",
           "request": {
             "method": "POST",
             "header": [
@@ -2552,91 +3065,85 @@
           "response": []
         }
       ],
-      "id": "86ac576c-84c6-4226-9e2d-e7fe3a82d8a5"
+      "id": "ea7ace83-b4ed-4c72-86f0-c7b44556bca0"
     }
   ],
   "variable": [
     {
-      "id": "552f614b-22b1-4495-8948-0a3c9a1a7830",
+      "id": "6173a228-b43c-421d-b603-f930058bc65c",
       "key": "BASE_URL",
       "value": "http://localhost:8080",
       "type": "string"
     },
     {
-      "id": "be774d4c-af61-4c31-9b44-4f0509befe75",
+      "id": "96e8cf29-1427-4436-b874-32798c324fb4",
       "key": "ACCESS_TOKEN",
       "value": "",
       "type": "string"
     },
     {
-      "id": "6b7fd77f-056d-4d33-8dca-a8a8b757f77f",
+      "id": "c998ba36-57b0-451f-a81a-b6d8f65965f8",
       "key": "TIKTOK_REDIRECT_URI",
       "value": "https://9e620f0baaf9.ngrok-free.app/api/tiktok/oauth/callback",
       "type": "string"
     },
     {
-      "id": "67dfcdbb-58aa-4d12-a9ec-8c1aaeb939ad",
+      "id": "acdb95cf-463c-4a6a-af75-642cf4b0dd0b",
       "key": "TIKTOK_AUTH_URL",
       "value": "",
       "type": "string"
     },
     {
-      "id": "79796f78-bbeb-41bf-83cd-37af686c750d",
+      "id": "c94ad2f8-8f7b-4141-8605-886a3b6b524e",
       "key": "TIKTOK_CODE_VERIFIER",
       "value": "",
       "type": "string"
     },
     {
-      "id": "a1ce7776-641c-4dc4-a586-61c38be202d0",
+      "id": "cca6d00d-2ce0-4669-84b2-e2d454cccb32",
       "key": "TIKTOK_AUTH_CODE",
       "value": "",
       "type": "string"
     },
     {
-      "id": "d1201b55-bc40-4300-9930-ddd4e2576456",
+      "id": "532ab25a-2111-47dd-a6b2-e9b6a99d7c0e",
       "key": "TIKTOK_ACCOUNT_ID",
       "value": "",
       "type": "string"
     },
     {
-      "id": "a1b45eae-4696-42a8-8eb4-e8e98608cf27",
+      "id": "12ef7b8b-78c5-4de1-a016-faeb9ad46a8e",
       "key": "MEDIA_URL",
       "value": "",
       "type": "string"
     },
     {
-      "id": "d5c13b96-4303-4b86-b415-adc20df49612",
+      "id": "2d54b160-6007-46b6-8415-5dd63b8d1df1",
       "key": "TIKTOK_OAUTH_STATE",
       "value": "",
       "type": "string"
     },
     {
-      "id": "ba54518a-1375-4bac-ad70-d7d2bb541118",
+      "id": "43aa9ff1-928a-4dfe-b23f-4d52ad1ec719",
       "key": "TIKTOK_WEBHOOK_SECRET",
       "value": "",
       "type": "string"
     },
     {
-      "id": "522aae55-6850-4036-a19d-fafd17068af6",
+      "id": "c6c53e8f-1b65-4f43-93ac-88c209ed65ce",
       "key": "scenarioId",
       "value": "",
       "type": "string"
     },
     {
-      "id": "07f1d1a7-8596-45ab-80c7-a07f798c7bf2",
+      "id": "44eacd7c-b616-45a9-8846-22c5473ea0a3",
       "key": "videoScenarioId",
       "value": "",
       "type": "string"
     },
     {
-      "id": "77930dde-9af3-4c88-a149-c04ae7a852d2",
+      "id": "b7da54f9-15eb-4ae3-9032-54f26df5b7fb",
       "key": "videoScenarioRunId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "id": "b8795def-c9a8-407a-8d58-742b6bff3de8",
-      "key": "RESET_TOKEN",
       "value": "",
       "type": "string"
     }

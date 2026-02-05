@@ -26,6 +26,16 @@ const scenarioRunWindowMs =
 const scenarioRunMaxRequests =
   Number(process.env.IMAGE_SCENARIO_RUN_RATE_MAX_REQUESTS) || 12;
 
+const videoScenarioWindowMs =
+  Number(process.env.VIDEO_SCENARIO_RATE_WINDOW_MS) || 15 * 60 * 1000; // 15 minutes
+const videoScenarioMaxRequests =
+  Number(process.env.VIDEO_SCENARIO_RATE_MAX_REQUESTS) || 40;
+
+const videoScenarioRunWindowMs =
+  Number(process.env.VIDEO_SCENARIO_RUN_RATE_WINDOW_MS) || 5 * 60 * 1000; // 5 minutes
+const videoScenarioRunMaxRequests =
+  Number(process.env.VIDEO_SCENARIO_RUN_RATE_MAX_REQUESTS) || 12;
+
 export const imageScenarioWriteLimiter = buildRateLimiter({
   windowMs: scenarioWindowMs,
   max: scenarioMaxRequests,
@@ -35,6 +45,18 @@ export const imageScenarioWriteLimiter = buildRateLimiter({
 export const imageScenarioRunLimiter = buildRateLimiter({
   windowMs: scenarioRunWindowMs,
   max: scenarioRunMaxRequests,
+  message: 'Too many scenario runs triggered. Please slow down.'
+});
+
+export const videoScenarioWriteLimiter = buildRateLimiter({
+  windowMs: videoScenarioWindowMs,
+  max: videoScenarioMaxRequests,
+  message: 'You are creating or updating scenarios too quickly. Please try again shortly.'
+});
+
+export const videoScenarioRunLimiter = buildRateLimiter({
+  windowMs: videoScenarioRunWindowMs,
+  max: videoScenarioRunMaxRequests,
   message: 'Too many scenario runs triggered. Please slow down.'
 });
 

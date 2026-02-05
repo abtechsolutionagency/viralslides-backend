@@ -69,12 +69,17 @@ import tiktokRoutes from './features/tiktok/routes/tiktokRoutes.js';
 import imageScenarioRoutes from './features/imageGeneration/routes/imageScenarioRoutes.js';
 import imageGenerationPublicRoutes from './features/imageGeneration/routes/imageGenerationPublicRoutes.js';
 import imageAssetCleanupService from './features/imageGeneration/services/imageAssetCleanupService.js';
+import videoScenarioRoutes from './features/videoGeneration/routes/videoScenarioRoutes.js';
+import videoGenerationPublicRoutes from './features/videoGeneration/routes/videoGenerationPublicRoutes.js';
+import videoAssetCleanupService from './features/videoGeneration/services/videoAssetCleanupService.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/tiktok', tiktokRoutes);
 app.use('/api/image-generation', imageGenerationPublicRoutes);
 app.use('/api/image-scenarios', imageScenarioRoutes);
+app.use('/api/video-generation', videoGenerationPublicRoutes);
+app.use('/api/video-scenarios', videoScenarioRoutes);
 
 // ---- health & root
 app.get('/', (_req, res) => {
@@ -109,5 +114,6 @@ async function start () {
 
 start();
 imageAssetCleanupService.start();
+videoAssetCleanupService.start();
 
 export default app;
