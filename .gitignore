@@ -53,3 +53,7 @@ temp/
 # Uploads & user generated content
 uploads/
 public/uploads/
+
+# video assets
+storage/video-generation/
+.mp4

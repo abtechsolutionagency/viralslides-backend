@@ -187,20 +187,35 @@ class VideoGenerationPipelineService {
       return null;
     }
 
+    const normalizedStatus = VIDEO_SCENARIO_RUN_STATUSES.includes(status) ? status : undefined;
     const assetPayload = preFiltered ? assets : this.selectFirstAssetPerPrompt(assets);
 
-    if (status === VIDEO_SCENARIO_RUN_STATUS.FAILED) {
+    if (normalizedStatus === VIDEO_SCENARIO_RUN_STATUS.FAILED) {
       run.status = VIDEO_SCENARIO_RUN_STATUS.FAILED;
       run.error = error || { message: 'Generation failed' };
       run.completedAt = new Date();
-    } else {
+    } else if (
+      normalizedStatus === VIDEO_SCENARIO_RUN_STATUS.COMPLETED ||
+      (!normalizedStatus && assetPayload.length > 0)
+    ) {
       run.status = VIDEO_SCENARIO_RUN_STATUS.COMPLETED;
       run.assets = assetPayload;
       run.videoCountGenerated = assetPayload.length;
       run.expandedPrompt = expandedPrompt || run.expandedPrompt;
       run.creditsCharged = creditsCharged ?? run.creditsCharged;
       run.creditsRefunded = creditsRefunded ?? run.creditsRefunded;
+      run.error = null;
       run.completedAt = new Date();
+    } else {
+      run.status = normalizedStatus || VIDEO_SCENARIO_RUN_STATUS.GENERATING;
+      run.expandedPrompt = expandedPrompt || run.expandedPrompt;
+      run.creditsCharged = creditsCharged ?? run.creditsCharged;
+      run.creditsRefunded = creditsRefunded ?? run.creditsRefunded;
+
+      if (assetPayload.length > 0) {
+        run.assets = assetPayload;
+        run.videoCountGenerated = assetPayload.length;
+      }
     }
 
     await run.save();

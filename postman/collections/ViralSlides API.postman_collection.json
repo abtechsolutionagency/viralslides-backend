@@ -314,7 +314,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"codewithashim@gmail.com\",\n  \"password\": \"Password123!\"\n}",
+              "raw": "{\n  \"email\": \"codewithhashim@gmail.com\",\n  \"password\": \"Password123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2901,7 +2901,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate stunning videos of futuristic cityscapes\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 1,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
+              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate videos of laptop talking\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 1,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/video-scenarios",
