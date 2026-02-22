@@ -1,6 +1,8 @@
 import videoGenerationPipelineService from '../services/videoGenerationPipelineService.js';
 import videoStorageService from '../services/videoStorageService.js';
 import { VIDEO_SCENARIO_RUN_STATUS } from '../constants/videoGenerationConstants.js';
+import VideoScenario from '../models/VideoScenario.js';
+import tiktokPublishService from '../../tiktok/services/tiktokPublishService.js';
 
 function mapKieResultUrls (payload = {}) {
   const candidates = [
@@ -101,8 +103,9 @@ function mapResultJsonUrls (payload = {}) {
   try {
     const parsed = JSON.parse(resultJson);
     return mapKieResultUrls(parsed);
-  } catch (_) {}
-  return null;
+  } catch {
+    return null;
+  }
 }
 
 function extractExpandedPrompt (payload = {}) {
@@ -111,8 +114,9 @@ function extractExpandedPrompt (payload = {}) {
   try {
     const parsed = JSON.parse(promptJson);
     return parsed?.prompt || null;
-  } catch (_) {}
-  return null;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeStatusFromProvider (rawStatus) {
@@ -152,6 +156,99 @@ function normalizeStatusFromProvider (rawStatus) {
 }
 
 class VideoGenerationCallbackController {
+  buildCaption ({ scenario, run }) {
+    const text = (run?.expandedPrompt || scenario?.prompt || '').trim();
+    if (!text) return '';
+    return text.slice(0, 2200);
+  }
+
+  async autoPublishCompletedRun ({ run, assets, req }) {
+    if (!run?.scenario || !run?.user) return null;
+    if (!Array.isArray(assets) || assets.length === 0) return null;
+
+    const scenario = await VideoScenario.findOne({ _id: run.scenario, user: run.user });
+    if (!scenario || !scenario.isAutoPostEnabled) {
+      return null;
+    }
+
+    const targets = Array.isArray(scenario.targets)
+      ? scenario.targets.filter((target) => target?.autoPost !== false)
+      : [];
+    if (targets.length === 0) {
+      return null;
+    }
+
+    const caption = this.buildCaption({ scenario, run });
+    const publishJobs = [];
+
+    for (const target of targets) {
+      const accountId = target.account?.toString?.() || target.account;
+      const privacy = target.privacy || 'public';
+
+      for (let assetIndex = 0; assetIndex < assets.length; assetIndex += 1) {
+        const asset = assets[assetIndex];
+        if (!asset?.url) continue;
+
+        const idempotencyKey = `video-run:${run._id}:account:${accountId}:asset:${assetIndex}`;
+
+        publishJobs.push(
+          tiktokPublishService.publishFromUrl({
+            userId: run.user,
+            accountId,
+            mediaUrl: asset.url,
+            caption,
+            privacy,
+            idempotencyKey
+          })
+            .then((result) => ({
+              success: true,
+              accountId,
+              assetIndex,
+              postId: result.postId
+            }))
+            .catch((error) => ({
+              success: false,
+              accountId,
+              assetIndex,
+              error: error.message || 'TikTok publish failed'
+            }))
+        );
+      }
+    }
+
+    const results = await Promise.all(publishJobs);
+    const successCount = results.filter((result) => result.success).length;
+    const failCount = results.length - successCount;
+
+    await VideoScenario.updateOne(
+      { _id: scenario._id },
+      {
+        $set: {
+          lastRunSummary: {
+            runId: run._id,
+            autoPostAttempted: true,
+            attemptedCount: results.length,
+            successCount,
+            failCount,
+            publishedAt: new Date(),
+            errors: results
+              .filter((result) => !result.success)
+              .map(({ accountId, assetIndex, error }) => ({ accountId, assetIndex, error }))
+          }
+        }
+      }
+    );
+
+    if (failCount > 0) {
+      req.log?.warn(
+        { runId: run._id, failCount, successCount },
+        'Video auto-post completed with partial failures'
+      );
+    }
+
+    return { successCount, failCount, attemptedCount: results.length };
+  }
+
   async handle (req, res) {
     try {
       const payload = typeof req.body === 'object' && req.body !== null ? req.body : {};
@@ -208,7 +305,7 @@ class VideoGenerationCallbackController {
           : VIDEO_SCENARIO_RUN_STATUS.GENERATING;
       })();
 
-      await videoGenerationPipelineService.handleMakeCallback({
+      const run = await videoGenerationPipelineService.handleMakeCallback({
         runId,
         assets: storedAssets,
         expandedPrompt: expandedPrompt || extractExpandedPrompt(payload),
@@ -245,6 +342,13 @@ class VideoGenerationCallbackController {
         creditsRefunded,
         preFiltered: true
       });
+
+      if (
+        derivedStatus === VIDEO_SCENARIO_RUN_STATUS.COMPLETED &&
+        storedAssets.length > 0
+      ) {
+        await this.autoPublishCompletedRun({ run, assets: storedAssets, req });
+      }
 
       if (derivedStatus === VIDEO_SCENARIO_RUN_STATUS.COMPLETED && storedAssets.length === 0) {
         req.log?.warn(

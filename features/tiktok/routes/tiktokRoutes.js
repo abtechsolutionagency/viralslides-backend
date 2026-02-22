@@ -24,6 +24,12 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 150
 // Public webhook (no auth)
 router.post('/webhook', tiktokWebhookController.handle.bind(tiktokWebhookController));
 
+// Support GET callback for redirect_uri in env
+router.get(
+  '/oauth/callback',
+  tiktokOAuthController.handleCallbackGet.bind(tiktokOAuthController)
+);
+
 router.use(authenticate, requireVerifiedEmail, requireActiveSubscription);
 
 router.get(
@@ -56,12 +62,6 @@ router.post(
   '/oauth/start',
   validate(startOAuthValidator),
   tiktokOAuthController.startConnection.bind(tiktokOAuthController)
-);
-
-// Support GET callback for redirect_uri in env
-router.get(
-  '/oauth/callback',
-  tiktokOAuthController.handleCallbackGet.bind(tiktokOAuthController)
 );
 
 router.post(

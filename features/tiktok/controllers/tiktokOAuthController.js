@@ -17,7 +17,8 @@ class TikTokOAuthController {
       const payload = {
         codeVerifier: data.codeVerifier,
         state: finalState,
-        redirectUri: redirectUri || null
+        redirectUri: redirectUri || null,
+        userId: req.user?._id?.toString?.() || null
       };
 
       const isProd = process.env.NODE_ENV === 'production';
@@ -74,12 +75,17 @@ class TikTokOAuthController {
         return res.status(400).json({ success: false, message: 'Missing code verifier. Restart connection.' });
       }
 
+      const userId = parsed?.userId || req.user?._id;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Missing user context. Restart connection.' });
+      }
+
       if (state && parsed?.state && state !== parsed.state) {
         return res.status(400).json({ success: false, message: 'State mismatch in OAuth callback' });
       }
 
       const result = await tiktokOAuthService.handleCallback({
-        userId: req.user._id,
+        userId,
         code,
         codeVerifier: parsed.codeVerifier,
         redirectUri: parsed.redirectUri || undefined,

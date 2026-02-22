@@ -20,7 +20,6 @@ const AUTH_BASE_URL = 'https://www.tiktok.com';
 const AUTH_PATH = '/v2/auth/authorize/';
 const API_BASE_URL = TIKTOK_API_BASE_URL?.replace(/\/$/, '') || 'https://open-api.tiktok.com';
 const TOKEN_ENDPOINT = '/v2/oauth/token/';
-const REFRESH_ENDPOINT = '/v2/oauth/refresh_token/';
 const USER_INFO_ENDPOINT = '/v2/user/info/';
 
 const TOKEN_GRACE_PERIOD =
@@ -151,7 +150,7 @@ class TikTokOAuthService {
     }
 
     const refreshedTokens = await this.requestToken({
-      endpoint: REFRESH_ENDPOINT,
+      endpoint: TOKEN_ENDPOINT,
       payload: {
         grant_type: 'refresh_token',
         client_key: TIKTOK_CLIENT_KEY,
@@ -200,11 +199,17 @@ class TikTokOAuthService {
 
   async requestToken ({ endpoint, payload }) {
     const url = `${API_BASE_URL}${endpoint}`;
+    const form = new URLSearchParams();
+
+    Object.entries(payload || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      form.append(key, String(value));
+    });
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString()
     });
 
     if (!response.ok) {

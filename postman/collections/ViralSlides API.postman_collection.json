@@ -120,6 +120,9 @@
           "name": "TikTok Webhook (test)",
           "id": "391694ce-4531-4e97-ac92-98fd84679d0a",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
             "header": [
               {
@@ -1607,6 +1610,7 @@
             {
               "listen": "test",
               "script": {
+                "id": "1c874e9f-e5a4-4081-a4de-70b900e64421",
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  var jsonData = pm.response.json();",
@@ -1623,7 +1627,20 @@
                   "}"
                 ],
                 "type": "text/javascript",
-                "id": "1c874e9f-e5a4-4081-a4de-70b900e64421"
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "5bab6e55-d84c-4411-9fa9-495d1d41631c",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1672,6 +1689,7 @@
             {
               "listen": "test",
               "script": {
+                "id": "e6ffaace-84bc-4561-a341-021febc61e2e",
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "  var jsonData = pm.response.json();",
@@ -1685,7 +1703,20 @@
                   "}"
                 ],
                 "type": "text/javascript",
-                "id": "e6ffaace-84bc-4561-a341-021febc61e2e"
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "f4a133b5-94e7-4fcb-9899-f74732fcd7f7",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -1710,7 +1741,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"{{TIKTOK_AUTH_CODE}}\",\n  \"codeVerifier\": \"{{TIKTOK_CODE_VERIFIER}}\",\n  \"redirectUri\": \"{{TIKTOK_REDIRECT_URI}}\"\n}"
+              "raw": "{\n  \"code\": \"HgDfwfDWEikbgIuDL_89eQ04XMSBrGPTPXIGhgGc3ylON-qOO_nsdg_8am6cfq-7uaICntrTYHHc_aGGQ09aGdyg3Z0yt3-RtwOdUURXGRH_CGU3-SKnoJlXsEsfY8QituXZkuPN18Aa4Z4IBoy5V2FHMERr6nmUESA3-Il9GSfcyGOjitQUf4-VYO6lLplfD3kIoZbuKSwvTaZw4pItXu2xw8y_FcQrH1_ttY_OL4755_zeoYwJVyDfAMJsz1zPpjmpM-2DiKNiUrIv%2Av%215943.va\",\n  \"codeVerifier\": \"lhwYiI_RgSbn12ch9yQpwxANNn-q3kFMvZ-K4xDy70c\",\n  \"redirectUri\": \"{{TIKTOK_REDIRECT_URI}}\",\n  \"state\": \"optional-state\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/tiktok/oauth/callback",
@@ -1770,574 +1801,11 @@
           "response": []
         },
         {
-          "name": "Connect TikTok Account",
-          "id": "ca0fbed6-e4b9-4b2e-bc17-7f37510bcb75",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"redirectUri\": \"http://localhost:3000/tiktok/callback\"\n}"
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/auth/connect",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "auth",
-                "connect"
-              ]
-            },
-            "description": "Initialize TikTok OAuth flow to connect user's TikTok account"
-          },
-          "response": []
-        },
-        {
-          "name": "TikTok OAuth Callback",
-          "id": "d1e74ddd-c57a-40b4-82a5-9cf372585556",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"code\": \"auth-code-from-tiktok\",\n  \"state\": \"state-from-oauth\"\n}"
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/auth/callback",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "auth",
-                "callback"
-              ]
-            },
-            "description": "Handle TikTok OAuth callback and save access tokens"
-          },
-          "response": []
-        },
-        {
-          "name": "Disconnect TikTok Account",
-          "id": "a91202f5-8531-492b-9545-26d9d6c4ec15",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/auth/disconnect",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "auth",
-                "disconnect"
-              ]
-            },
-            "description": "Disconnect user's TikTok account and revoke access"
-          },
-          "response": []
-        },
-        {
-          "name": "Get TikTok Profile",
-          "id": "7bf1ac7e-aa73-47b1-b541-96fa959968fb",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/profile",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "profile"
-              ]
-            },
-            "description": "Get connected TikTok account profile information"
-          },
-          "response": []
-        },
-        {
-          "name": "Convert Slides to TikTok Video",
-          "id": "222b03a8-1147-4afa-a8da-bbd763566153",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"slideId\": \"slide-123\",\n  \"options\": {\n    \"duration\": 30,\n    \"transitionEffect\": \"fade\",\n    \"aspectRatio\": \"9:16\",\n    \"music\": {\n      \"trackId\": \"tiktok-music-id\",\n      \"volume\": 0.5\n    },\n    \"watermark\": true,\n    \"quality\": \"HD\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/convert",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "convert"
-              ]
-            },
-            "description": "Convert presentation slides to TikTok-optimized video format"
-          },
-          "response": []
-        },
-        {
-          "name": "Upload to TikTok",
-          "id": "1ddaf0a0-97a3-4552-a292-9d4a7da8b6e7",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"caption\": \"Check out my presentation! #viral #slides\",\n  \"hashtags\": [\"#presentation\", \"#viral\", \"#education\"],\n  \"privacy\": \"public\",\n  \"allowComments\": true,\n  \"allowDuet\": true,\n  \"allowStitch\": true,\n  \"scheduleTime\": null\n}"
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/upload",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "upload"
-              ]
-            },
-            "description": "Upload converted video to TikTok with caption and settings"
-          },
-          "response": []
-        },
-        {
-          "name": "Get TikTok Posts",
-          "id": "f176cec6-06e4-4a9d-9279-e5bb4c8dcb88",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/posts?limit=20&offset=0",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "posts"
-              ],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "20"
-                },
-                {
-                  "key": "offset",
-                  "value": "0"
-                }
-              ]
-            },
-            "description": "Get list of user's TikTok posts created through the app"
-          },
-          "response": []
-        },
-        {
-          "name": "Get TikTok Post Analytics",
-          "id": "13dce735-a8c8-437e-8232-c06154dd5efa",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/analytics/post/{{postId}}",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "analytics",
-                "post",
-                "{{postId}}"
-              ]
-            },
-            "description": "Get analytics data for a specific TikTok post"
-          },
-          "response": []
-        },
-        {
-          "name": "Get TikTok Account Analytics",
-          "id": "de1f49ea-f4cf-40f4-abed-f7853bce1238",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/analytics/account?startDate=2024-01-01&endDate=2024-01-31",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "analytics",
-                "account"
-              ],
-              "query": [
-                {
-                  "key": "startDate",
-                  "value": "2024-01-01"
-                },
-                {
-                  "key": "endDate",
-                  "value": "2024-01-31"
-                }
-              ]
-            },
-            "description": "Get overall TikTok account analytics for a date range"
-          },
-          "response": []
-        },
-        {
-          "name": "Delete TikTok Post",
-          "id": "7606749c-d740-4694-98cd-bed0d9635ad3",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/posts/{{postId}}",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "posts",
-                "{{postId}}"
-              ]
-            },
-            "description": "Delete a TikTok post created through the app"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Trending Hashtags",
-          "id": "3ff12ced-bb9e-410b-86fd-141a9c90c0bf",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/trends/hashtags?category=education&limit=20",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "trends",
-                "hashtags"
-              ],
-              "query": [
-                {
-                  "key": "category",
-                  "value": "education"
-                },
-                {
-                  "key": "limit",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Get trending TikTok hashtags for content optimization"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Trending Audio",
-          "id": "7aa93a01-19bf-417b-b991-0c8a81282a9a",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/trends/audio?limit=20",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "trends",
-                "audio"
-              ],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Get trending TikTok audio tracks for video creation"
-          },
-          "response": []
-        },
-        {
-          "name": "Schedule TikTok Post",
-          "id": "7191ff82-6145-4c74-8c7a-705e823ff259",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"videoId\": \"converted-video-id\",\n  \"scheduleTime\": \"2024-12-25T10:00:00Z\",\n  \"caption\": \"Scheduled post #viral\",\n  \"hashtags\": [\"#scheduled\", \"#content\"],\n  \"privacy\": \"public\"\n}"
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/schedule",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "schedule"
-              ]
-            },
-            "description": "Schedule a TikTok post for future publishing"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Scheduled Posts",
-          "id": "d6be227a-87fa-4d92-bf7d-377da2aaf997",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/scheduled",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "scheduled"
-              ]
-            },
-            "description": "Get list of all scheduled TikTok posts"
-          },
-          "response": []
-        },
-        {
-          "name": "Cancel Scheduled Post",
-          "id": "e7934b9a-882c-4729-92e3-bce5fb73c8ca",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{BASE_URL}}/api/tiktok/scheduled/{{scheduleId}}",
-              "host": [
-                "{{BASE_URL}}"
-              ],
-              "path": [
-                "api",
-                "tiktok",
-                "scheduled",
-                "{{scheduleId}}"
-              ]
-            },
-            "description": "Cancel a scheduled TikTok post"
-          },
-          "response": []
-        },
-        {
           "name": "GET TikTok OAuth Callback (Server Redirect)",
           "id": "cdb20fea-2c6e-42f8-bccc-90b318970135",
           "request": {
             "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{ACCESS_TOKEN}}",
-                  "type": "string"
-                }
-              ]
+              "type": "noauth"
             },
             "method": "GET",
             "header": [],
@@ -2901,7 +2369,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate videos of laptop talking\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 1,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
+              "raw": "{\n  \"title\": \"My Video Generation Scenario\",\n  \"prompt\": \"Generate videos of laptop talking and lecturing\",\n  \"aspectRatio\": \"9:16\",\n  \"videoCount\": 1,\n  \"aiModelId\": \"gpt4o-video\",\n  \"targets\": [\n    {\n      \"account\": \"{{accountId}}\",\n      \"privacy\": \"public\",\n      \"autoPost\": true\n    }\n  ],\n  \"schedule\": {\n    \"type\": \"daily\",\n    \"timezone\": \"America/New_York\",\n    \"dailyAt\": \"14:30\",\n    \"windows\": [\n      {\n        \"dayOfWeek\": 1,\n        \"time\": \"09:00\"\n      },\n      {\n        \"dayOfWeek\": 3,\n        \"time\": \"15:00\"\n      }\n    ]\n  },\n  \"isAutoPostEnabled\": true,\n  \"metadata\": {\n    \"customField\": \"customValue\"\n  }\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/api/video-scenarios",

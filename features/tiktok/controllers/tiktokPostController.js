@@ -38,7 +38,7 @@ class TikTokPostController {
 
       return res.status(201).json({
         success: true,
-        message: 'TikTok video published',
+        message: result?.mode === 'inbox' ? 'TikTok video uploaded to inbox' : 'TikTok video published',
         data: result
       });
     } catch (error) {

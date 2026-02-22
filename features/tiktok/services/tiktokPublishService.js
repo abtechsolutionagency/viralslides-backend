@@ -4,40 +4,141 @@ import tiktokAccountService from './tiktokAccountService.js';
 import tiktokOAuthService from './tiktokOAuthService.js';
 import { decryptSecret } from '../utils/secretUtils.js';
 
-const API_BASE_URL = (process.env.TIKTOK_API_BASE_URL || 'https://open-api.tiktok.com').replace(/\/$/, '');
+const API_BASE_URL = (process.env.TIKTOK_CONTENT_POST_API_BASE_URL || 'https://open.tiktokapis.com').replace(/\/$/, '');
 
-// Endpoints (aligned with TikTok Open API v2 naming)
-const VIDEO_UPLOAD_ENDPOINT = '/v2/video/upload/';
-const VIDEO_PUBLISH_ENDPOINT = '/v2/video/publish/';
+// TikTok Content Posting API v2 endpoints
+const DIRECT_POST_INIT_ENDPOINT = '/v2/post/publish/video/init/';
+const INBOX_POST_INIT_ENDPOINT = '/v2/post/publish/inbox/video/init/';
+const CREATOR_INFO_QUERY_ENDPOINT = '/v2/post/publish/creator_info/query/';
 
-function assertResponseOk (res) {
-  if (!res.ok) {
-    throw new Error(`TikTok request failed (${res.status} ${res.statusText})`);
-  }
+const PUBLISH_MODE = {
+  DIRECT: 'direct',
+  INBOX: 'inbox'
+};
+
+function normalizePrivacy (privacy) {
+  const value = String(privacy ?? '').toLowerCase();
+  if (value === 'private' || value === '2' || value === 'self_only') return 'private';
+  if (value === 'friends' || value === '1' || value === 'mutual_follow_friends') return 'friends';
+  return 'public';
 }
 
-async function parseTikTokJson (res) {
-  const body = await res.json().catch(() => ({}));
+function privacyPreferenceOrder (privacy) {
+  const normalized = normalizePrivacy(privacy);
+  if (normalized === 'private') {
+    return ['SELF_ONLY', 'MUTUAL_FOLLOW_FRIENDS', 'FOLLOWER_OF_CREATOR', 'PUBLIC_TO_EVERYONE'];
+  }
+  if (normalized === 'friends') {
+    return ['MUTUAL_FOLLOW_FRIENDS', 'FOLLOWER_OF_CREATOR', 'SELF_ONLY', 'PUBLIC_TO_EVERYONE'];
+  }
+  return ['PUBLIC_TO_EVERYONE', 'MUTUAL_FOLLOW_FRIENDS', 'FOLLOWER_OF_CREATOR', 'SELF_ONLY'];
+}
+
+function resolvePrivacyLevel (privacy, options) {
+  const preferred = privacyPreferenceOrder(privacy);
+  const available = Array.isArray(options)
+    ? options.map((item) => String(item).toUpperCase()).filter(Boolean)
+    : [];
+
+  if (available.length === 0) {
+    return preferred[0];
+  }
+
+  const set = new Set(available);
+  return preferred.find((level) => set.has(level)) || available[0];
+}
+
+function extractTikTokError (body) {
+  const error = body?.error;
+  if (error && typeof error === 'object') {
+    const code = error.code ?? error.error_code;
+    const normalizedCode = typeof code === 'string' ? code.toLowerCase() : code;
+    if (code !== undefined && code !== null && code !== 0 && code !== '0' && normalizedCode !== 'ok') {
+      return {
+        code,
+        message: error.message || error.description || 'Unknown TikTok error',
+        details: error
+      };
+    }
+  }
+
   const data = body?.data ?? body;
-  const errorCode = data?.error_code ?? body?.error_code;
-  if (typeof errorCode === 'number' && errorCode !== 0) {
-    const description = data?.description || body?.description || 'Unknown TikTok error';
-    const displayMsg = data?.display_message || data?.message || description;
-    const code = errorCode;
-    const err = new Error(`TikTok error (${code}): ${displayMsg}`);
-    err.code = code;
-    err.tiktok = data || body;
+  const legacyCode = data?.error_code ?? body?.error_code;
+  if (legacyCode !== undefined && legacyCode !== null) {
+    const normalizedCode = typeof legacyCode === 'string' ? legacyCode.toLowerCase() : legacyCode;
+    if (legacyCode !== 0 && legacyCode !== '0' && normalizedCode !== 'ok') {
+      return {
+        code: legacyCode,
+        message: data?.display_message || data?.message || data?.description || body?.description || 'Unknown TikTok error',
+        details: data
+      };
+    }
+  }
+
+  return null;
+}
+
+function buildTikTokError ({ status, statusText, body }) {
+  const tiktokError = extractTikTokError(body);
+  if (tiktokError) {
+    const err = new Error(`TikTok error (${tiktokError.code}): ${tiktokError.message}`);
+    err.code = tiktokError.code;
+    err.tiktok = tiktokError.details || body;
+    err.status = status;
     throw err;
   }
-  return data;
+
+  const fallbackMessage =
+    body?.message ||
+    body?.error?.message ||
+    body?.description ||
+    body?.raw ||
+    `${status} ${statusText}`;
+  const err = new Error(`TikTok request failed (${status} ${statusText}): ${fallbackMessage}`);
+  err.status = status;
+  err.tiktok = body;
+  throw err;
 }
 
-function mapPrivacy (privacy) {
-  // Map to TikTok expected values (0 public, 1 friends, 2 private) or string enum depending on API variant
-  const val = String(privacy || '').toLowerCase();
-  if (val === 'private' || val === '2') return 2;
-  if (val === 'friends' || val === '1') return 1;
-  return 0; // default public
+async function parseResponseBody (res) {
+  const text = await res.text().catch(() => '');
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    return { raw: text };
+  }
+}
+
+async function requestTikTokJson ({ url, accessToken, payload = {}, method = 'POST' }) {
+  const headers = {
+    Authorization: `Bearer ${accessToken}`
+  };
+  if (method !== 'GET') {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: method === 'GET' ? undefined : JSON.stringify(payload)
+  });
+
+  const body = await parseResponseBody(res);
+  if (!res.ok) {
+    buildTikTokError({ status: res.status, statusText: res.statusText, body });
+  }
+
+  const tiktokError = extractTikTokError(body);
+  if (tiktokError) {
+    const err = new Error(`TikTok error (${tiktokError.code}): ${tiktokError.message}`);
+    err.code = tiktokError.code;
+    err.tiktok = tiktokError.details || body;
+    throw err;
+  }
+
+  return body?.data ?? body;
 }
 
 class TikTokPublishService {
@@ -72,87 +173,187 @@ class TikTokPublishService {
     }
   }
 
-  async uploadVideoFromUrl ({ accessToken, mediaUrl }) {
-    if (!mediaUrl) throw new Error('mediaUrl is required');
-
-    const downloadRes = await fetch(mediaUrl);
-    assertResponseOk(downloadRes);
-    const contentType = downloadRes.headers.get('content-type') || 'video/mp4';
-    const buffer = Buffer.from(await downloadRes.arrayBuffer());
-
-    return this.uploadVideoBinary({ accessToken, buffer, contentType });
+  getScopes (accountDoc) {
+    return Array.isArray(accountDoc?.scopes) ? accountDoc.scopes : [];
   }
 
-  async uploadVideoBinary ({ accessToken, buffer, contentType = 'video/mp4' }) {
-    const url = `${API_BASE_URL}${VIDEO_UPLOAD_ENDPOINT}`;
-
-    const form = new FormData();
-    const filename = `upload_${Date.now()}.mp4`;
-    form.append('video', new Blob([buffer], { type: contentType }), filename);
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      body: form
-    });
-
-    assertResponseOk(res);
-    const data = await parseTikTokJson(res);
-    const videoId = data?.video_id || data?.video?.video_id || data?.id;
-    if (!videoId) {
-      throw new Error('TikTok did not return a video_id');
+  resolvePublishMode (accountDoc) {
+    const scopes = new Set(this.getScopes(accountDoc).map((scope) => String(scope).trim()));
+    if (scopes.has('video.publish')) {
+      return PUBLISH_MODE.DIRECT;
     }
-    return { videoId };
+    if (scopes.has('video.upload')) {
+      return PUBLISH_MODE.INBOX;
+    }
+    throw new Error('TikTok account is missing required scope: video.upload or video.publish');
   }
 
-  async publishVideo ({ accessToken, videoId, caption, privacy }) {
-    const url = `${API_BASE_URL}${VIDEO_PUBLISH_ENDPOINT}`;
-    const payload = {
-      video_id: videoId,
-      text: caption || '',
-      privacy_level: mapPrivacy(privacy)
+  buildDirectPostInfo ({ caption, privacy, creatorInfo }) {
+    const postInfo = {
+      privacy_level: resolvePrivacyLevel(privacy, creatorInfo?.privacy_level_options)
     };
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify(payload)
+    const title = String(caption || '').trim();
+    if (title) {
+      postInfo.title = title.slice(0, 2200);
+    }
+
+    if (typeof creatorInfo?.comment_disabled === 'boolean') {
+      postInfo.disable_comment = creatorInfo.comment_disabled;
+    }
+    if (typeof creatorInfo?.duet_disabled === 'boolean') {
+      postInfo.disable_duet = creatorInfo.duet_disabled;
+    }
+    if (typeof creatorInfo?.stitch_disabled === 'boolean') {
+      postInfo.disable_stitch = creatorInfo.stitch_disabled;
+    }
+
+    return postInfo;
+  }
+
+  async fetchCreatorInfo ({ accessToken }) {
+    const url = `${API_BASE_URL}${CREATOR_INFO_QUERY_ENDPOINT}`;
+    return requestTikTokJson({
+      url,
+      accessToken,
+      payload: {},
+      method: 'POST'
     });
-    assertResponseOk(res);
-    const data = await parseTikTokJson(res);
-    const postId = data?.publish_id || data?.video_id || data?.id || videoId;
-    return { postId, raw: data };
   }
 
-  async publishFromUrl ({ userId, accountId, mediaUrl, caption, privacy }) {
-    return this._publish({ userId, accountId, caption, privacy, mediaUrl });
+  async initPostFromUrl ({ accessToken, mediaUrl, caption, privacy, mode }) {
+    if (!mediaUrl) throw new Error('mediaUrl is required');
+
+    const endpoint = mode === PUBLISH_MODE.DIRECT ? DIRECT_POST_INIT_ENDPOINT : INBOX_POST_INIT_ENDPOINT;
+    const payload = {
+      source_info: {
+        source: 'PULL_FROM_URL',
+        video_url: mediaUrl
+      }
+    };
+
+    if (mode === PUBLISH_MODE.DIRECT) {
+      const creatorInfo = await this.fetchCreatorInfo({ accessToken });
+      payload.post_info = this.buildDirectPostInfo({ caption, privacy, creatorInfo });
+    }
+
+    const url = `${API_BASE_URL}${endpoint}`;
+    const data = await requestTikTokJson({ url, accessToken, payload, method: 'POST' });
+    const publishId = data?.publish_id || data?.publishId;
+    if (!publishId) {
+      throw new Error('TikTok did not return publish_id');
+    }
+
+    return {
+      publishId,
+      mode,
+      raw: data
+    };
   }
 
-  async publishFromBuffer ({ userId, accountId, buffer, contentType, caption, privacy }) {
-    return this._publish({ userId, accountId, buffer, contentType, caption, privacy });
+  async initPostFromBuffer ({ accessToken, buffer, contentType = 'video/mp4', caption, privacy, mode }) {
+    if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+      throw new Error('Uploaded video file is empty');
+    }
+
+    const endpoint = mode === PUBLISH_MODE.DIRECT ? DIRECT_POST_INIT_ENDPOINT : INBOX_POST_INIT_ENDPOINT;
+    const payload = {
+      source_info: {
+        source: 'FILE_UPLOAD',
+        video_size: buffer.length,
+        chunk_size: buffer.length,
+        total_chunk_count: 1
+      }
+    };
+
+    if (mode === PUBLISH_MODE.DIRECT) {
+      const creatorInfo = await this.fetchCreatorInfo({ accessToken });
+      payload.post_info = this.buildDirectPostInfo({ caption, privacy, creatorInfo });
+    }
+
+    const url = `${API_BASE_URL}${endpoint}`;
+    const data = await requestTikTokJson({ url, accessToken, payload, method: 'POST' });
+    const publishId = data?.publish_id || data?.publishId;
+    const uploadUrl = data?.upload_url || data?.uploadUrl;
+    if (!publishId || !uploadUrl) {
+      throw new Error('TikTok did not return upload_url/publish_id for file upload');
+    }
+
+    await this.uploadBinaryToUploadUrl({ uploadUrl, buffer, contentType });
+
+    return {
+      publishId,
+      mode,
+      raw: data
+    };
+  }
+
+  async uploadBinaryToUploadUrl ({ uploadUrl, buffer, contentType }) {
+    const total = buffer.length;
+    const end = total - 1;
+
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType || 'video/mp4',
+        'Content-Length': String(total),
+        'Content-Range': `bytes 0-${end}/${total}`
+      },
+      body: buffer
+    });
+
+    const body = await parseResponseBody(res);
+    if (!res.ok) {
+      buildTikTokError({ status: res.status, statusText: res.statusText, body });
+    }
+
+    const tiktokError = extractTikTokError(body);
+    if (tiktokError) {
+      const err = new Error(`TikTok upload error (${tiktokError.code}): ${tiktokError.message}`);
+      err.code = tiktokError.code;
+      err.tiktok = tiktokError.details || body;
+      throw err;
+    }
+  }
+
+  async publishFromUrl ({ userId, accountId, mediaUrl, caption, privacy, idempotencyKey }) {
+    return this._publish({ userId, accountId, caption, privacy, mediaUrl, idempotencyKey });
+  }
+
+  async publishFromBuffer ({ userId, accountId, buffer, contentType, caption, privacy, idempotencyKey }) {
+    return this._publish({ userId, accountId, buffer, contentType, caption, privacy, idempotencyKey });
   }
 
   async _publish ({ userId, accountId, mediaUrl, buffer, contentType, caption, privacy, idempotencyKey }) {
     const { account, accessToken } = await this.ensureFreshAccessToken({ userId, accountId });
     await this.precheckQuota(account);
+    const mode = this.resolvePublishMode(account);
 
     // Handle idempotency
     let existingLog = null;
     if (idempotencyKey) {
       existingLog = await TikTokPublishLog.findOne({ user: userId, account: accountId, idempotencyKey });
       if (existingLog && existingLog.postId) {
-        return { postId: existingLog.postId, videoId: existingLog.videoId, account: tiktokAccountService.serializeAccount(account), tiktok: existingLog.response };
+        return {
+          postId: existingLog.postId,
+          videoId: existingLog.videoId,
+          mode,
+          account: tiktokAccountService.serializeAccount(account),
+          tiktok: existingLog.response
+        };
       }
     }
 
-    let videoId;
+    let publishResult;
     if (buffer) {
-      ({ videoId } = await this.uploadVideoBinary({ accessToken, buffer, contentType }));
+      publishResult = await this.initPostFromBuffer({ accessToken, buffer, contentType, caption, privacy, mode });
     } else {
-      ({ videoId } = await this.uploadVideoFromUrl({ accessToken, mediaUrl }));
+      publishResult = await this.initPostFromUrl({ accessToken, mediaUrl, caption, privacy, mode });
     }
+
+    const postId = publishResult.publishId;
+    const raw = publishResult.raw;
+    const logStatus = publishResult.mode === PUBLISH_MODE.DIRECT ? 'published' : 'created';
 
     if (idempotencyKey && !existingLog) {
       try {
@@ -160,25 +361,31 @@ class TikTokPublishService {
           user: userId,
           account: accountId,
           idempotencyKey,
-          videoId,
+          videoId: null,
+          postId,
           status: 'created',
           request: { mediaUrl: mediaUrl || null, caption, privacy }
         });
       } catch (_) {}
     }
-    const { postId, raw } = await this.publishVideo({ accessToken, videoId, caption, privacy });
 
     const updated = await tiktokAccountService.recordPostUsage({ userId, accountId, count: 1 });
 
     if (idempotencyKey) {
       await TikTokPublishLog.findOneAndUpdate(
         { user: userId, account: accountId, idempotencyKey },
-        { $set: { postId, response: raw, status: 'published' } },
+        { $set: { postId, response: raw, status: logStatus } },
         { upsert: true }
       );
     }
 
-    return { postId, videoId, account: updated, tiktok: raw };
+    return {
+      postId,
+      videoId: null,
+      mode,
+      account: updated,
+      tiktok: raw
+    };
   }
 }
 

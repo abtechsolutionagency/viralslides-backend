@@ -1,5 +1,6 @@
 import VideoScenario from '../models/VideoScenario.js';
 import videoGenerationPipelineService from './videoGenerationPipelineService.js';
+import tiktokAccountService from '../../tiktok/services/tiktokAccountService.js';
 import {
   VIDEO_AI_MODELS,
   VIDEO_SCENARIO_ASPECT_RATIOS,
@@ -52,7 +53,8 @@ class VideoScenarioService {
   normalizeTargets (targets) {
     if (!Array.isArray(targets)) return [];
 
-    return targets
+    const dedupedTargets = new Map();
+    targets
       .map((target) => {
         const accountId = target.account || target.accountId || target.tiktokAccountId;
         if (!accountId || !isValidObjectId(accountId)) {
@@ -67,7 +69,12 @@ class VideoScenarioService {
           autoPost: target.autoPost !== false
         };
       })
-      .filter(Boolean);
+      .filter(Boolean)
+      .forEach((target) => {
+        dedupedTargets.set(target.account.toString(), target);
+      });
+
+    return Array.from(dedupedTargets.values());
   }
 
   normalizeSchedule (schedule) {
@@ -134,6 +141,16 @@ class VideoScenarioService {
 
   async createScenario ({ userId, payload }) {
     const aiModel = this.normalizeAiModel(payload?.aiModel || payload?.aiModelId || payload?.modelId);
+    const videoCount = this.sanitizeVideoCount(payload.videoCount);
+    const normalizedTargets = this.normalizeTargets(payload.targets);
+    const isAutoPostEnabled = payload.isAutoPostEnabled !== false;
+
+    await tiktokAccountService.validateScenarioTargets({
+      userId,
+      targets: normalizedTargets,
+      postsPerRun: videoCount,
+      isAutoPostEnabled
+    });
 
     const scenario = await VideoScenario.create({
       user: userId,
@@ -142,15 +159,15 @@ class VideoScenarioService {
       status: payload.status && VIDEO_SCENARIO_STATUSES.includes(payload.status)
         ? payload.status
         : VIDEO_SCENARIO_STATUS.DRAFT,
-      videoCount: this.sanitizeVideoCount(payload.videoCount),
+      videoCount,
       aspectRatio: VIDEO_SCENARIO_ASPECT_RATIOS.includes(payload.aspectRatio)
         ? payload.aspectRatio
         : '9:16',
       aiModel,
       thumbnailUrl: payload.thumbnailUrl || null,
-      targets: this.normalizeTargets(payload.targets),
+      targets: normalizedTargets,
       schedule: this.normalizeSchedule(payload.schedule),
-      isAutoPostEnabled: payload.isAutoPostEnabled !== false,
+      isAutoPostEnabled,
       metadata: payload.metadata || {}
     });
 
@@ -163,6 +180,23 @@ class VideoScenarioService {
       return null;
     }
 
+    const nextVideoCount = payload.videoCount !== undefined
+      ? this.sanitizeVideoCount(payload.videoCount)
+      : scenario.videoCount;
+    const nextTargets = payload.targets
+      ? this.normalizeTargets(payload.targets)
+      : scenario.targets;
+    const nextIsAutoPostEnabled = payload.isAutoPostEnabled !== undefined
+      ? Boolean(payload.isAutoPostEnabled)
+      : scenario.isAutoPostEnabled;
+
+    await tiktokAccountService.validateScenarioTargets({
+      userId,
+      targets: nextTargets,
+      postsPerRun: nextVideoCount,
+      isAutoPostEnabled: nextIsAutoPostEnabled
+    });
+
     if (payload.title) scenario.title = payload.title;
     if (payload.prompt) scenario.prompt = payload.prompt;
 
@@ -171,7 +205,7 @@ class VideoScenarioService {
     }
 
     if (payload.videoCount !== undefined) {
-      scenario.videoCount = this.sanitizeVideoCount(payload.videoCount);
+      scenario.videoCount = nextVideoCount;
     }
 
     if (payload.aspectRatio && VIDEO_SCENARIO_ASPECT_RATIOS.includes(payload.aspectRatio)) {
@@ -189,7 +223,7 @@ class VideoScenarioService {
     }
 
     if (payload.targets) {
-      scenario.targets = this.normalizeTargets(payload.targets);
+      scenario.targets = nextTargets;
     }
 
     if (payload.schedule) {
@@ -197,7 +231,7 @@ class VideoScenarioService {
     }
 
     if (payload.isAutoPostEnabled !== undefined) {
-      scenario.isAutoPostEnabled = Boolean(payload.isAutoPostEnabled);
+      scenario.isAutoPostEnabled = nextIsAutoPostEnabled;
     }
 
     if (payload.metadata) {

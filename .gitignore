@@ -57,3 +57,4 @@ public/uploads/
 # video assets
 storage/video-generation/
 .mp4
+.trigger
